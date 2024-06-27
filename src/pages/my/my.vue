@@ -3,11 +3,11 @@
 </script>
 
 <template>
-  <view class="grid-home">
-    Home-Page
+  <view class="tabbar-my">
+    My Page
   </view>
 </template>
 
 <style lang="scss">
-  .grid-home {}
+  .tabbar-my {}
 </style>

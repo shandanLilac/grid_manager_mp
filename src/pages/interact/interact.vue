@@ -3,11 +3,11 @@
 </script>
 
 <template>
-  <view class="grid-home">
-    Home-Page
+  <view class="tabbar-interact">
+    Interact Page
   </view>
 </template>
 
 <style lang="scss">
-  .grid-home {}
+  .tabbar-interact {}
 </style>
