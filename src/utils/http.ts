@@ -5,7 +5,7 @@ import { useMemStore } from "@/store";
 const httpInterceptor = {
   invoke(options: UniApp.RequestOptions) {
     if (!options.url.startsWith('https')) {
-      options.url = tempUrl + options.url
+      options.url = baseURL + options.url
     }
     options.timeout = 10000
     // 在options.header={}中添加小程序端请求标识（不需要）

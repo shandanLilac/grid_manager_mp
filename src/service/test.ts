@@ -1,18 +1,8 @@
 import http from "@/utils/http";
 
-type BannerItem = {
-  id: string
-  imgUrl: string
-  hrefUrl: string
-  type: number
-}
-
-export const testAPI = (distributionCode?: number) => {
-  return http.request<BannerItem[]>({
-    url: '/home/banner',
+export const testAPI = () => {
+  return http.request({
+    url: '/api/abstracts',
     method: 'GET',
-    data: {
-      distributionCode
-    }
   })
 }
