@@ -1,0 +1,30 @@
+$GridColor: #27ba9b;
+$defColor: #03a9f4;
+$helpColor: #e26237;
+$sucColor: #1dc779;
+$warnColor: #ffb302;
+$tempColor: #cf4444;
+
+@mixin commonHead() {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 10rpx;
+
+  .title {
+    padding: 8rpx 0 8rpx 20rpx;
+    font-size: 36rpx;
+    font-weight: 700;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10rpx;
+      height: 100%;
+      background-color: $GridColor;
+    }
+  }
+}

@@ -1,15 +1,16 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/data/data",
+			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "资料"
+				"navigationBarTitleText": "工作台",
+				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/index/index",
+			"path": "pages/data/data",
 			"style": {
-				"navigationBarTitleText": "工作台"
+				"navigationBarTitleText": "资料"
 			}
 		},
 		{
@@ -37,16 +38,16 @@
 		"borderStyle": "black",
 		"list": [
 			{
-				"text": "资料",
-				"pagePath": "pages/data/data",
-				"iconPath": "static/tabs/data-default.png",
-				"selectedIconPath": "static/tabs/data-selected.png"
-			},
-			{
 				"text": "工作台",
 				"pagePath": "pages/index/index",
 				"iconPath": "static/tabs/workbench-default.png",
 				"selectedIconPath": "static/tabs/workbench-selected.png"
+			},
+			{
+				"text": "资料",
+				"pagePath": "pages/data/data",
+				"iconPath": "static/tabs/data-default.png",
+				"selectedIconPath": "static/tabs/data-selected.png"
 			},
 			{
 				"text": "交流",
@@ -57,8 +58,8 @@
 			{
 				"text": "我的",
 				"pagePath": "pages/my/my",
-				"iconPath": "static/tabs/user_default.png",
-				"selectedIconPath": "static/tabs/user_selected.png"
+				"iconPath": "static/tabs/user_default2.png",
+				"selectedIconPath": "static/tabs/user_selected2.png"
 			}
 		]
 	},

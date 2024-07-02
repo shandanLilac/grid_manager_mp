@@ -14,7 +14,7 @@
 
 <style lang="scss">
   // 字体图标
-  // @import '@/styles/fonts.scss';
+  @import '@/static/fonts/iconfont.css';
 
   view,
   navigator,
@@ -47,5 +47,12 @@
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+  }
+
+  // 单行文本溢出
+  .ellipsis1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>
