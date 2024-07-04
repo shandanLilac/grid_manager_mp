@@ -15,8 +15,11 @@
       chartData.value = JSON.parse(JSON.stringify(res))
     }, 500)
   }
-  const onGetIndex = (e: any) => {
+  const onGetIndex = async (e: any) => {
+    const { cancel } = await uni.showModal({ title: '提示消息', content: '前往查看花名册？' })
+    if (cancel) return
     console.log(e)
+    // TODO:跳转页面，渲染相应的数据
   }
 </script>
 
@@ -27,29 +30,48 @@
     </view>
     <view class="cc-body">
       <!-- 社区列表 -->
-      <!-- <uni-section title="社区列表" type="line"> -->
-      <view class="communities">
-        <view class="community-item" v-for="(item, index) in 12" :key="item" :class="{ active: index === 0 }">
-          <text class="prefix">A</text>
-          <text class="name">北街</text>
-          <text class="entry">></text>
+      <!-- <uni-section title="社区" type="square"> -->
+      <uni-card title="社区列表">
+        <view class="communities">
+          <view class="community-item" v-for="(item, index) in 12" :key="item" :class="{ active: index === 0 }">
+            <text class="prefix">A</text>
+            <text class="name">北街</text>
+            <text class="entry">></text>
+          </view>
         </view>
-      </view>
+      </uni-card>
       <!-- </uni-section> -->
 
       <!-- 社区概况（图表版） -->
-      <!-- <uni-section title="社区详情" type="line"> -->
-      <uni-card title="县府街社区" :isFull="true" sub-title="概况" extra="简介 >">
+      <!-- <uni-section title="社区详情" sub-title="县府街社区" type="line"> -->
+      <uni-card title="社区概况" sub-title="县府街社区" extra="简介 >">
         <view class="community-info">
-          <view class="info_1">
-            <view class="pie chart">
-              总人口（城镇、农村）
+          <view class="info-plain">
+            <view class="population">
+              <view class="label">人口：1000人</view>
+              <text class="detail">
+                <text class="num-town text">城镇100(10%)</text>
+                <text class="num-rural text">农村900(90%)</text>
+              </text>
             </view>
-            <view class="ring chart">居民小区人口占比</view>
+            <view class="area">
+              <view class="label">范围：</view>
+              <view class="detail">
+                <text class="text">城北小区</text>
+                <text class="text">邮政家属楼</text>
+                <text class="text">仁和小区</text>
+                <text class="text">仁爱小区</text>
+                <text class="text">裕清苑</text>
+                <text class="text">银海小区</text>
+                <text class="text">仁和新城东区</text>
+                <text class="text">仁和新城西区</text>
+              </view>
+            </view>
           </view>
-          <view class="info_2">
+          <view class="label">重点人群：</view>
+          <view class="info-chart">
             <qiun-data-charts type="mount" :opts="opts" :chartData="chartData" :optsWatch="false"
-              canvasId="community_info_01" :inScrollView="true" pageScrollTop="" @getIndex="onGetIndex" />
+              canvasId="community_info_01" :inScrollView="true" @getIndex="onGetIndex" />
           </view>
         </view>
       </uni-card>
@@ -61,9 +83,7 @@
 <style lang="scss">
   .community-container {
     margin-top: 20rpx;
-    border-radius: 8rpx;
-    overflow: hidden;
-    background-color: #fff;
+    // background-color: #fff;
 
     .cc-head {
       @include commonHead();
@@ -78,7 +98,7 @@
       align-items: center;
 
       .community-item {
-        width: 160rpx;
+        width: 140rpx;
         height: 68rpx;
         padding: 0 4rpx;
         border: 1rpx solid #ddd;
@@ -111,20 +131,11 @@
     }
 
     .community-info {
-      width: 100%;
-      height: 600rpx;
-      display: flex;
-      flex-direction: column;
+      @include indexInfoDetail();
 
-      .info_1 {
+      .info-chart {
         width: 100%;
-        height: 300rpx;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .info_2 {
-        flex: 1;
+        height: 150px;
       }
     }
   }

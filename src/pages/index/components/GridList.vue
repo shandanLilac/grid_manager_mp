@@ -1,5 +1,7 @@
 <script setup lang='ts'>
   import { ref } from 'vue'
+  import { gridChartOpts } from "@/static/config/ucharts-opts";
+  import { onReady } from '@dcloudio/uni-app'
 
   const grids = ref([
     { value: 0, text: '第一网格' },
@@ -16,33 +18,64 @@
   const onChange: UniHelper.UniDataSelectOnChange = (e) => {
     console.log(e)
   }
+
+  // 图表
+  const chartData = ref({})
+  onReady(() => {
+    getServerData()
+  })
+  const getServerData = () => {
+    // 模拟异步获取数据
+    setTimeout(() => {
+      const res = ref({
+        series: [
+          {
+            data: [{ "name": "低保", "value": 82 }, { "name": "高龄", "value": 63 }, { "name": "残疾人", "value": 86 }, { "name": "独居老人", "value": 65 }, { "name": "留守儿童", "value": 79 }]
+          }
+        ]
+      })
+      chartData.value = JSON.parse(JSON.stringify(res.value))
+    }, 500);
+  }
+  const getIndex = (e: any) => {
+    console.log(e)
+  }
 </script>
 
 <template>
   <div class="grid-container">
     <view class="gc-head">
       <view class="title">网格</view>
-      <!-- <view class="community">概况 ></view> -->
     </view>
     <view class="gc-body">
       <view class="gc-body-item">
-        <uni-section title="选择网格" sub-title="县府街社区" type="square">
-          <view class="select-wrapper">
-            <uni-data-select v-model="value" :localdata="grids" @change="onChange"></uni-data-select>
-          </view>
-        </uni-section>
+        <view class="select-wrapper">
+          <view class="title">请选择网格</view>
+          <uni-data-select v-model="value" :localdata="grids" @change="onChange"></uni-data-select>
+        </view>
       </view>
       <view class="gc-body-item">
-        <uni-section class="mb-10" title="网格概况" type="line">
-          <view class="grid-info">
-            <view class="info-item" v-for="(item, index) in 10" :key="index">
-              <view class="key">范围:</view>
-              <view class="value">
-                <text>城北小区,平房区</text>
-              </view>
+        <!-- <uni-section title="网格概况" type="line"> -->
+        <uni-card title="网格概况" sub-title="北街社区第一网格" extra="查看简介">
+          <view class="grid-manager">
+            <view class="label">网格员</view>
+            <view class="detail">
+              <text class="text">文婷</text>
+              <text class="text">0936-2727733</text>
             </view>
+            <view class="label">辅助网格员</view>
+            <view class="detail">
+              <text class="text">丁芙蓉</text>
+              <text class="text">0936-2727733</text>
+            </view>
+            <view class="label">重点人员</view>
           </view>
-        </uni-section>
+          <view class="grid-info">
+            <qiun-data-charts type="mount" :opts="gridChartOpts" :chartData="chartData" :inScrollView="true"
+              @getIndex="getIndex" />
+          </view>
+        </uni-card>
+        <!-- </uni-section> -->
       </view>
     </view>
   </div>
@@ -51,10 +84,6 @@
 <style scoped lang='scss'>
   .grid-container {
     margin-top: 20rpx;
-    // padding: 10rpx;
-    background-color: #fff;
-    border-radius: 8rpx;
-    overflow: hidden;
 
     .gc-head {
       @include commonHead();
@@ -64,27 +93,30 @@
       padding: 8rpx;
 
       .select-wrapper {
-        padding-left: 32rpx;
         z-index: 256;
+        margin: 30rpx;
+        padding: 20rpx;
+        background-color: #fff;
+        border: 1px #fff solid;
+        border-radius: 8rpx;
+        box-shadow: 0 0 6rpx 2rpx rgba($color: #000, $alpha: 0.08);
+        box-sizing: border-box;
+
+        .title {
+          height: 64rpx;
+          line-height: 64rpx;
+          font-size: 30rpx;
+          color: #666;
+        }
+      }
+
+      .grid-manager {
+        @include indexInfoDetail();
       }
 
       .grid-info {
-        padding-left: 32rpx;
-
-        .info-item {
-          height: 48rpx;
-          margin: 4rpx 0;
-          display: flex;
-          align-items: center;
-
-          .key {
-            width: 80rpx;
-          }
-
-          .value {
-            flex: 1;
-          }
-        }
+        width: 100%;
+        height: 300rpx;
       }
     }
   }

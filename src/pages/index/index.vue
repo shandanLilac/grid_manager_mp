@@ -17,8 +17,8 @@
       <CommunityList />
       <GridList />
       <ResidentialArea />
-      <view class="grid-home">
-        Home-Page
+      <view class="page-bottom">
+        ---- 到底了 ----
       </view>
     </scroll-view>
   </view>
@@ -40,5 +40,13 @@
   .scroll-view {
     flex: 1;
     overflow: hidden;
+  }
+
+  .page-bottom {
+    height: 84rpx;
+    line-height: 84rpx;
+    text-align: center;
+    color: #999;
+    font-size: 28rpx;
   }
 </style>

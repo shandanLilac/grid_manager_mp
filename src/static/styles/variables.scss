@@ -28,3 +28,24 @@ $tempColor: #cf4444;
     }
   }
 }
+
+@mixin indexInfoDetail() {
+  .label {
+    border-radius: 4rpx;
+    color: $GridColor;
+    font-weight: 700;
+  }
+
+  .detail {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .text {
+    margin-right: 12rpx;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
