@@ -1,32 +1,38 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { getNewsCarouselAPI } from '@/service/home'
+  import type{ NewsResult } from '@/types/home'
+  import { onLoad } from '@dcloudio/uni-app'
+  import { onMounted, ref } from 'vue'
+
   const activeIndex = ref(0)
   const handleChange: UniHelper.SwiperOnChange = (e) => {
     activeIndex.value = e.detail.current
   }
+  // 请求接口，获取轮播图数据
+  const carouselData = ref<NewsResult[]>([])
+  const getNewsCarouselData = async () => {
+    const res = await getNewsCarouselAPI()
+    carouselData.value = res.result
+  }
+
+  onLoad(async() => {
+    await getNewsCarouselData()
+  })
+
 </script>
 
 <template>
   <view class="carousel">
-    <swiper :circular="true" :autoplay="true" :interval="3000" @change="handleChange">
-      <swiper-item>
-        <navigator url="/pages/index/index" hover-class="none" class="navigator">
-          <image mode="aspectFill" class="image" src="@/static/imgs/news1.jpg"></image>
-        </navigator>
-      </swiper-item>
-      <swiper-item>
-        <navigator url="/pages/index/index" hover-class="none" class="navigator">
-          <image mode="aspectFill" class="image" src="@/static/imgs/news2.png"></image>
+    <swiper :circular="true" :autoplay="true" :interval="5000" @change="handleChange">
+      <swiper-item v-for="item in carouselData" :key="item.id">
+        <navigator :url="`/pages/details/art-detail?type=news&id=${item.id}`" hover-class="none" class="navigator">
+          <image mode="aspectFill" class="image" :src="item.imgUrl"/>
         </navigator>
       </swiper-item>
     </swiper>
-    <!-- 指示点 -->
-    <!-- <view class="indicator">
-      <text v-for="(item, index) in 2" :key="item" class="dot" :class="{ active: index === activeIndex }"></text>
-    </view> -->
     <view class="indicator">
-      <text class="count">{{ activeIndex + 1 }}/2</text>
-      <text class="title ellipsis1">title...</text>
+      <text class="count">{{ activeIndex + 1 }}/{{ carouselData.length }}</text>
+      <text class="title ellipsis1">{{ carouselData[activeIndex]?.title }}</text>
     </view>
   </view>
 </template>
@@ -63,31 +69,11 @@
 
       .title {
         flex: 1;
+        font-size: 24rpx;
         margin-left: 8rpx;
 
       }
     }
-
-    // .indicator {
-    //   position: absolute;
-    //   left: 0;
-    //   right: 0;
-    //   bottom: 16rpx;
-    //   display: flex;
-    //   justify-content: center;
-
-    //   .dot {
-    //     width: 30rpx;
-    //     height: 6rpx;
-    //     margin: 0 8rpx;
-    //     border-radius: 6rpx;
-    //     background-color: rgba(255, 255, 255, 0.4);
-    //   }
-
-    //   .active {
-    //     background-color: #fff;
-    //   }
-    // }
 
     .navigator,
     .image {

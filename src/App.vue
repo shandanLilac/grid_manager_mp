@@ -55,4 +55,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  .rich-text-p {
+    margin: 15rpx 0;
+    line-height: 1.5;
+    font-size: 30rpx;
+    text-indent: 2em;
+  }
 </style>

@@ -24,6 +24,12 @@
 			"style": {
 				"navigationBarTitleText": "我的"
 			}
+		},
+		{
+			"path":"pages/details/art-detail",
+			"style": {
+				"navigationBarTitleText": "文章详情"
+			}
 		}
 	],
 	"globalStyle": {

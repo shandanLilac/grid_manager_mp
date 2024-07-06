@@ -6,7 +6,4 @@
 </template>
 
 <style lang="scss">
-.tabbar-data {
-  color: #333;
-}
 </style>

@@ -1,4 +1,4 @@
-import { baseURL, tempUrl } from "@/static/config/global";
+import { baseURL} from "@/static/config/global";
 import { useMemStore } from "@/store";
 
 // 拦截器
@@ -10,7 +10,7 @@ const httpInterceptor = {
     options.timeout = 10000
     // 在options.header={}中添加小程序端请求标识（不需要）
     const memStore = useMemStore()
-    const token = memStore.profile.token
+    const token = memStore.profile?.token || ''
     if (token) options.header.Authorization = token
   }
 }
@@ -84,10 +84,10 @@ class HttpRequest {
   }
   // 封装快捷方法
   get<T>(url: string, data: DataInReqOptions = {}) {
-    return this.request({ url, data, method: 'GET' })
+    return this.request<T>({ url, data, method: 'GET' })
   }
   post<T>(url: string, data: DataInReqOptions = {}) {
-    return this.request({ url, data, method: 'POST' })
+    return this.request<T>({ url, data, method: 'POST' })
   }
 }
 
