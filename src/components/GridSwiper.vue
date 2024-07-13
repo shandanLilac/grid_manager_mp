@@ -1,22 +1,21 @@
 <script setup lang="ts">
-  import { getNewsCarouselAPI } from '@/service/home'
-  import type{ NewsResult } from '@/types/home'
+  import { getNewsCarouselAPI, type NewsList } from '@/service/home'
   import { onLoad } from '@dcloudio/uni-app'
-  import { onMounted, ref } from 'vue'
+  import { ref } from 'vue'
 
   const activeIndex = ref(0)
   const handleChange: UniHelper.SwiperOnChange = (e) => {
     activeIndex.value = e.detail.current
   }
   // 请求接口，获取轮播图数据
-  const carouselData = ref<NewsResult[]>([])
+  const carouselData = ref<NewsList[]>([])
   const getNewsCarouselData = async () => {
     const res = await getNewsCarouselAPI()
     carouselData.value = res.result
   }
 
-  onLoad(async() => {
-    await getNewsCarouselData()
+  onLoad(() => {
+    getNewsCarouselData()
   })
 
 </script>
@@ -26,7 +25,7 @@
     <swiper :circular="true" :autoplay="true" :interval="5000" @change="handleChange">
       <swiper-item v-for="item in carouselData" :key="item.id">
         <navigator :url="`/pages/details/art-detail?type=news&id=${item.id}`" hover-class="none" class="navigator">
-          <image mode="aspectFill" class="image" :src="item.imgUrl"/>
+          <image mode="aspectFill" class="image" :src="item.imgUrl" />
         </navigator>
       </swiper-item>
     </swiper>

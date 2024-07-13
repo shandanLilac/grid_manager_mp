@@ -1,5 +1,5 @@
 import http from '@/utils/http'
-import type { NewsResult } from '@/types/home'
+import type { CommInfo, NewsResult } from '@/types/home'
 
 // 轮播图news列表
 export type NewsList = Pick<NewsResult, 'id' | 'title' | 'imgUrl'>
@@ -19,3 +19,17 @@ export const getNewsDetailAPI = (id: string) => {
   })
 }
 
+// 社区列表
+export type CommItem = {
+  id: string
+  name: string
+  code: string
+}
+export const getCommListAPI = () => {
+  return http.get<CommItem[]>('/api/community_list')
+}
+
+// 社区信息
+export const getCommInfoAPI = (id: number) => {
+  return http.get<CommInfo>('/api/community_info', { id })
+}

@@ -61,12 +61,6 @@
         background-color: #f7f7f7;
         font-size: 26rpx;
       }
-
-      :deep(p) {
-        text-indent: 2;
-        padding: 20rpx 0;
-        font-size: 30rpx;
-      }
     }
   }
 </style>

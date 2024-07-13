@@ -1,6 +1,6 @@
 <script setup lang='ts'>
   import { ref } from 'vue'
-  import { gridChartOpts } from "@/static/config/ucharts-opts";
+  import { gridChartOpts } from "@/static/config/ucharts-opts"
   import { onReady } from '@dcloudio/uni-app'
 
   const grids = ref([
@@ -35,7 +35,7 @@
         ]
       })
       chartData.value = JSON.parse(JSON.stringify(res.value))
-    }, 500);
+    }, 500)
   }
   const getIndex = (e: any) => {
     console.log(e)
@@ -48,35 +48,26 @@
       <view class="title">网格</view>
     </view>
     <view class="gc-body">
-      <view class="gc-body-item">
-        <view class="select-wrapper">
-          <view class="title">请选择网格</view>
-          <uni-data-select v-model="value" :localdata="grids" @change="onChange"></uni-data-select>
+      <uni-card title="网格概况" margin="10rpx" padding="10rpx">
+        <uni-data-select v-model="value" :localdata="grids" @change="onChange" />
+        <view class="grid-manager">
+          <view class="label">网格员</view>
+          <view class="detail">
+            <text class="text">文婷</text>
+            <text class="text">0936-2727733</text>
+          </view>
+          <view class="label">辅助网格员</view>
+          <view class="detail">
+            <text class="text">丁芙蓉</text>
+            <text class="text">0936-2727733</text>
+          </view>
+          <view class="label">重点人员</view>
         </view>
-      </view>
-      <view class="gc-body-item">
-        <!-- <uni-section title="网格概况" type="line"> -->
-        <uni-card title="网格概况" sub-title="北街社区第一网格" extra="查看简介">
-          <view class="grid-manager">
-            <view class="label">网格员</view>
-            <view class="detail">
-              <text class="text">文婷</text>
-              <text class="text">0936-2727733</text>
-            </view>
-            <view class="label">辅助网格员</view>
-            <view class="detail">
-              <text class="text">丁芙蓉</text>
-              <text class="text">0936-2727733</text>
-            </view>
-            <view class="label">重点人员</view>
-          </view>
-          <view class="grid-info">
-            <qiun-data-charts type="mount" :opts="gridChartOpts" :chartData="chartData" :inScrollView="true"
-              @getIndex="getIndex" />
-          </view>
-        </uni-card>
-        <!-- </uni-section> -->
-      </view>
+        <view class="grid-info">
+          <qiun-data-charts type="mount" :opts="gridChartOpts" :chartData="chartData" :inScrollView="true"
+            @getIndex="getIndex" />
+        </view>
+      </uni-card>
     </view>
   </div>
 </template>
@@ -90,7 +81,6 @@
     }
 
     .gc-body {
-      padding: 8rpx;
 
       .select-wrapper {
         z-index: 256;

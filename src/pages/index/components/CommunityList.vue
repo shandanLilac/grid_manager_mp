@@ -1,20 +1,33 @@
 <script setup lang="ts">
-  import { uchartCommunity3, uchartCommunity1_data } from '@/static/config/ucharts-opts'
-  import { onReady } from '@dcloudio/uni-app'
-  import { ref } from 'vue'
+  import { getCommListAPI, type CommItem } from '@/service/home'
+  import { uchartCommunity3 } from '@/static/config/ucharts-opts'
+  import { useGridStore } from '@/store/modules/grid'
+  import { onLoad } from '@dcloudio/uni-app'
+  import { computed, ref } from 'vue'
 
-  const chartData = ref({})
+  const gridStore = useGridStore()
+
+  // 社区列表
+  const commList = ref<CommItem[]>([])
+  const getCommList = async () => {
+    const res = await getCommListAPI()
+    commList.value = res.result
+  }
+  onLoad(() => {
+    Promise.all([getCommList(), gridStore.getCommInfo()])
+  })
+  // 点击社区名称高亮
+  const tabCurrItem = (index: number) => {
+    gridStore.commNum = index
+  }
+  // 当前社区名称
+  const curName = computed(() => {
+    return commList.value[gridStore.commNum]?.name + '社区'
+  })
+
+  const chartData = ref()
   const opts = ref(uchartCommunity3)
 
-  onReady(() => {
-    getServerData()
-  })
-  const getServerData = () => {
-    setTimeout(() => {
-      const res = uchartCommunity1_data
-      chartData.value = JSON.parse(JSON.stringify(res))
-    }, 500)
-  }
   const onGetIndex = async (e: any) => {
     const { cancel } = await uni.showModal({ title: '提示消息', content: '前往查看花名册？' })
     if (cancel) return
@@ -30,52 +43,57 @@
     </view>
     <view class="cc-body">
       <!-- 社区列表 -->
-      <!-- <uni-section title="社区" type="square"> -->
-      <uni-card title="社区列表">
+      <uni-card margin="10rpx" padding="10rpx">
+        <template #title>
+          <view class="title-slot">
+            <text class="iconfont icon-zhongguojie"></text>
+            <text class="title">社区列表</text>
+          </view>
+        </template>
         <view class="communities">
-          <view class="community-item" v-for="(item, index) in 12" :key="item" :class="{ active: index === 0 }">
-            <text class="prefix">A</text>
-            <text class="name">北街</text>
-            <text class="entry">></text>
+          <view class="community-item" v-for="(item, index) in commList" :key="item.id"
+            :class="{ active: index === gridStore.commNum }" @tap="tabCurrItem(index)">
+            <text class="name">{{ item.name }}</text>
           </view>
         </view>
       </uni-card>
-      <!-- </uni-section> -->
 
-      <!-- 社区概况（图表版） -->
-      <!-- <uni-section title="社区详情" sub-title="县府街社区" type="line"> -->
-      <uni-card title="社区概况" sub-title="县府街社区" extra="简介 >">
+      <!-- 社区概况 -->
+      <uni-card title="社区概况" :sub-title="curName" extra="" margin="10rpx" padding="10rpx">
         <view class="community-info">
           <view class="info-plain">
             <view class="population">
-              <view class="label">人口：1000人</view>
-              <text class="detail">
-                <text class="num-town text">城镇100(10%)</text>
-                <text class="num-rural text">农村900(90%)</text>
-              </text>
+              <view class="label">人口：{{ gridStore.popu.total }} </view>
+              <view class="num-town ratio">
+                <view class="ratio-face"
+                  :style="{ background: `linear-gradient(to left,transparent ${gridStore.popu.ruralRatio},rgba(39,186,155,.5) ${gridStore.popu.townRatio})` }">
+                  <text>城镇:{{ gridStore.popu.town }}</text>
+                  <text>{{ gridStore.popu.townRatio }}</text>
+                </view>
+              </view>
+              <view class="num-rural ratio">
+                <view class="ratio-face"
+                  :style="{ background: `linear-gradient(to right,rgba(39,186,155,.5) ${gridStore.popu.ruralRatio},transparent ${gridStore.popu.townRatio})` }">
+                  <text>农村:{{ gridStore.popu.rural }}</text>
+                  <text class="ratio-item">{{ gridStore.popu.ruralRatio }}</text>
+                </view>
+              </view>
             </view>
             <view class="area">
               <view class="label">范围：</view>
-              <view class="detail">
-                <text class="text">城北小区</text>
-                <text class="text">邮政家属楼</text>
-                <text class="text">仁和小区</text>
-                <text class="text">仁爱小区</text>
-                <text class="text">裕清苑</text>
-                <text class="text">银海小区</text>
-                <text class="text">仁和新城东区</text>
-                <text class="text">仁和新城西区</text>
+              <view class="detail buildings">
+                <uni-tag class="area-item" v-for="item in gridStore.commInfo?.buildingsArea" :key="item.name"
+                  :text="item.name" size="normal" inverted type="warning" />
               </view>
             </view>
           </view>
           <view class="label">重点人群：</view>
           <view class="info-chart">
-            <qiun-data-charts type="mount" :opts="opts" :chartData="chartData" :optsWatch="false"
+            <qiun-data-charts type="mount" :opts="opts" :chartData="gridStore.chartData" :optsWatch="false"
               canvasId="community_info_01" :inScrollView="true" @getIndex="onGetIndex" />
           </view>
         </view>
       </uni-card>
-      <!-- </uni-section> -->
     </view>
   </view>
 </template>
@@ -83,10 +101,21 @@
 <style lang="scss">
   .community-container {
     margin-top: 20rpx;
-    // background-color: #fff;
 
     .cc-head {
       @include commonHead();
+    }
+
+    .title-slot {
+      padding: 20rpx;
+      border-bottom: 1px solid #e7e7e7;
+
+      .iconfont {
+        margin-right: 20rpx;
+        font-size: 48rpx;
+        font-weight: 700;
+        color: red;
+      }
     }
 
     .communities {
@@ -103,35 +132,58 @@
         padding: 0 4rpx;
         border: 1rpx solid #ddd;
         border-radius: 8rpx;
-        background: url('@/static/imgs/community-item-bg2.png') no-repeat center/cover;
+        background: url('@/static/imgs/community-item-bg0.png') no-repeat center/cover;
         box-sizing: border-box;
         font-size: 26rpx;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
       }
 
       .active {
         justify-content: center;
-        border: 1rpx solid $tempColor;
+        border: 1rpx solid $GridColor;
         transition: all 0.2s;
-
-        .prefix,
-        .entry {
-          display: none;
-        }
+        background: url('@/static/imgs/community-item-bg2.png') no-repeat center/cover;
 
         .name {
-          color: $tempColor;
-          font-weight: 600;
-          font-size: 36rpx;
+          color: $GridColor;
+          font-weight: 500;
+          font-size: 32rpx;
           text-align: center;
         }
+
       }
     }
 
     .community-info {
       @include indexInfoDetail();
+
+      .info-plain {
+        .population {
+          .ratio {
+            margin-bottom: 8rpx;
+            padding: 4rpx;
+            border: 1px solid #ccc;
+            border-radius: 8rpx;
+            box-sizing: border-box;
+            font-size: 24rpx;
+
+            .ratio-face {
+              display: flex;
+              justify-content: space-between;
+              border: 1px solid #f7f7f7;
+              border-radius: 8rpx;
+            }
+          }
+        }
+
+        .area {
+          .area-item {
+            margin: 10rpx 4rpx 0 0;
+          }
+        }
+      }
 
       .info-chart {
         width: 100%;
