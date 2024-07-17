@@ -1,78 +1,100 @@
-<script setup lang='ts'>
+<script setup lang="ts">
   import { ref } from 'vue'
-  import { gridChartOpts } from "@/static/config/ucharts-opts"
+  import { gridChartOpts } from '@/static/config/ucharts-opts'
   import { onReady } from '@dcloudio/uni-app'
+  import { getGridChartDataAPI, getGridManagerInfoAPI, getGridNumAPI, type GridItem, type GridMIParam } from '@/service/home'
+  import type { UniDataSelectOnChange } from '@uni-helper/uni-ui-types/index';
+  import type { GridManagerInfo } from '@/types/home';
+  import { useGridStore } from '@/store/modules/grid'
 
-  const grids = ref([
-    { value: 0, text: '第一网格' },
-    { value: 1, text: '第二网格' },
-    { value: 2, text: '第三网格' },
-    { value: 3, text: '第四网格' },
-    { value: 4, text: '第五网格' },
-    { value: 5, text: '第六网格' },
-    { value: 6, text: '第七网格' },
-    { value: 7, text: '第八网格' },
-    { value: 8, text: '第九网格' },
-  ])
-  const value = ref(0)
-  const onChange: UniHelper.UniDataSelectOnChange = (e) => {
-    console.log(e)
+  const gridStore = useGridStore()
+
+  // 获取网格列表数据
+  const grids = ref<GridItem[]>()
+  const getGridNum = async () => {
+    const res = await getGridNumAPI(1)
+    grids.value = res.result
   }
 
+  // 网格员信息
+  const gridParams = ref<GridMIParam>({
+    comm_num: 1,
+    grid_num: gridStore.gridNum || 1
+    // ???疑问：这里直接使用store中的数据为什么不行？
+  })
+  const gridManagerInfo = ref<GridManagerInfo[]>()
+  const getGridManagerInfo = async () => {
+    const res = await getGridManagerInfoAPI(gridParams.value)
+    gridManagerInfo.value = res.result
+  }
+  // 选择网格
+  const onChange: UniDataSelectOnChange = (e) => {
+    // gridParams.value.grid_num = e as number
+    gridStore.gridNum = e as number
+    getGridManagerInfo()
+    getGridChartData()
+  }
   // 图表
   const chartData = ref({})
-  onReady(() => {
-    getServerData()
-  })
-  const getServerData = () => {
-    // 模拟异步获取数据
-    setTimeout(() => {
-      const res = ref({
-        series: [
-          {
-            data: [{ "name": "低保", "value": 82 }, { "name": "高龄", "value": 63 }, { "name": "残疾人", "value": 86 }, { "name": "独居老人", "value": 65 }, { "name": "留守儿童", "value": 79 }]
-          }
-        ]
-      })
-      chartData.value = JSON.parse(JSON.stringify(res.value))
-    }, 500)
+  const getGridChartData = async () => {
+    const res = await getGridChartDataAPI(gridParams.value)
+    chartData.value = JSON.parse(JSON.stringify(res.result))
   }
+
+  onReady(() => {
+    getGridNum()
+    getGridManagerInfo()
+    getGridChartData()
+  })
   const getIndex = (e: any) => {
     console.log(e)
   }
 </script>
 
 <template>
-  <div class="grid-container">
+  <view class="grid-container">
+    <!-- 标题 -->
     <view class="gc-head">
       <view class="title">网格</view>
     </view>
-    <view class="gc-body">
-      <uni-card title="网格概况" margin="10rpx" padding="10rpx">
-        <uni-data-select v-model="value" :localdata="grids" @change="onChange" />
-        <view class="grid-manager">
+    <!-- 内容 -->
+    <uni-card title="网格概况" margin="10rpx" padding="10rpx">
+      <view class="gc-body">
+        <!-- 选择网格 -->
+        <view class="grid-choose grid-item">
+          <uni-data-select v-model="gridParams.grid_num" :localdata="grids" @change="onChange" />
+        </view>
+        <!-- 网格员 -->
+        <view class="grid-manager grid-item">
           <view class="label">网格员</view>
-          <view class="detail">
-            <text class="text">文婷</text>
-            <text class="text">0936-2727733</text>
+          <view class="detail" v-for="item in gridManagerInfo" :key="item.id">
+            <uni-collapse>
+              <uni-collapse-item :title="item.name + ' ' + item.phone">
+                <view>姓名：{{ item.name }}</view>
+                <view>性别：{{ item.gender }}</view>
+                <view>身份证号码：{{ item.id_card }}</view>
+                <view>电话：{{ item.phone }}</view>
+                <view>类别：{{ item.type }}</view>
+                <view>政治面貌：{{ item.political_type }}</view>
+                <view>分配日期：{{ item.date }}</view>
+              </uni-collapse-item>
+            </uni-collapse>
           </view>
-          <view class="label">辅助网格员</view>
-          <view class="detail">
-            <text class="text">丁芙蓉</text>
-            <text class="text">0936-2727733</text>
+        </view>
+        <!-- 网格信息 -->
+        <view class="grid-info grid-item">
+          <view class="label">重点人员：</view>
+          <view class="chart">
+            <qiun-data-charts type="mount" :opts="gridChartOpts" :chartData="chartData" :inScrollView="true"
+              @getIndex="getIndex" />
           </view>
-          <view class="label">重点人员</view>
         </view>
-        <view class="grid-info">
-          <qiun-data-charts type="mount" :opts="gridChartOpts" :chartData="chartData" :inScrollView="true"
-            @getIndex="getIndex" />
-        </view>
-      </uni-card>
-    </view>
-  </div>
+      </view>
+    </uni-card>
+  </view>
 </template>
 
-<style scoped lang='scss'>
+<style lang="scss">
   .grid-container {
     margin-top: 20rpx;
 
@@ -81,32 +103,18 @@
     }
 
     .gc-body {
+      padding-bottom: 10rpx;
 
-      .select-wrapper {
-        z-index: 256;
-        margin: 30rpx;
-        padding: 20rpx;
-        background-color: #fff;
-        border: 1px #fff solid;
-        border-radius: 8rpx;
-        box-shadow: 0 0 6rpx 2rpx rgba($color: #000, $alpha: 0.08);
-        box-sizing: border-box;
-
-        .title {
-          height: 64rpx;
-          line-height: 64rpx;
-          font-size: 30rpx;
-          color: #666;
-        }
-      }
-
-      .grid-manager {
+      .grid-item {
+        margin-bottom: 20rpx;
         @include indexInfoDetail();
       }
 
       .grid-info {
-        width: 100%;
-        height: 300rpx;
+        .chart {
+          width: 100%;
+          height: 300rpx;
+        }
       }
     }
   }

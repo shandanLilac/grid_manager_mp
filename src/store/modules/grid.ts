@@ -4,14 +4,14 @@ import { defineStore } from "pinia"
 import { ref, computed } from "vue"
 
 export const useGridStore = defineStore('grid', () => {
+  // 社区
   // 社区编号
   const commNum = ref(0)
-
   // 请求社区信息
   const commInfo = ref<CommInfo>()
   const chartData = ref<ChartData>()
   const getCommInfo = async () => {
-    const res = await getCommInfoAPI(commNum.value + 1)
+    const res = await getCommInfoAPI({comm_num:commNum.value+1})
     commInfo.value = res.result
     chartData.value = JSON.parse(JSON.stringify(commInfo.value.chartData))
   }
@@ -25,8 +25,15 @@ export const useGridStore = defineStore('grid', () => {
     return { total, town, rural, ruralRatio, townRatio }
   })
 
+  // 网格
+  // 网格编号
+  const gridNum=ref(1)
+
+  // 居民小区
   return {
-    commNum, commInfo, chartData, popu,
-    getCommInfo
+    // 社区
+    commNum, commInfo, chartData, popu,getCommInfo,
+    // 网格
+    gridNum
   }
 })
