@@ -1,8 +1,8 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { computed, ref } from 'vue'
   import { gridChartOpts } from '@/static/config/ucharts-opts'
   import { onReady } from '@dcloudio/uni-app'
-  import { getGridChartDataAPI, getGridManagerInfoAPI, getGridNumAPI, type GridItem, type GridMIParam } from '@/service/home'
+  import { getGridChartDataAPI, getGridManagerInfoAPI, getGridNumAPI, type GridItem, } from '@/service/home'
   import type { UniDataSelectOnChange } from '@uni-helper/uni-ui-types/index';
   import type { GridManagerInfo } from '@/types/home';
   import { useGridStore } from '@/store/modules/grid'
@@ -17,10 +17,11 @@
   }
 
   // 网格员信息
-  const gridParams = ref<GridMIParam>({
-    comm_num: 1,
-    grid_num: gridStore.gridNum || 1
-    // ???疑问：这里直接使用store中的数据为什么不行？
+  const gridParams = computed(() => {
+    return {
+      comm_num: gridStore.commNum || 1,
+      grid_num: gridStore.gridNum || 1
+    }
   })
   const gridManagerInfo = ref<GridManagerInfo[]>()
   const getGridManagerInfo = async () => {
@@ -28,9 +29,8 @@
     gridManagerInfo.value = res.result
   }
   // 选择网格
-  const onChange: UniDataSelectOnChange = (e) => {
-    // gridParams.value.grid_num = e as number
-    gridStore.gridNum = e as number
+  const onChange: UniHelper.UniDataSelectOnChange = (e) => {
+    gridStore.updateGridNum(e)
     getGridManagerInfo()
     getGridChartData()
   }

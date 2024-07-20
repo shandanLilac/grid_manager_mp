@@ -1,39 +1,55 @@
-import { getCommInfoAPI } from "@/service/home"
-import type { ChartData, CommInfo } from "@/types/home"
 import { defineStore } from "pinia"
-import { ref, computed } from "vue"
+import { ref } from "vue"
+
+type CommonType = string | number | undefined
 
 export const useGridStore = defineStore('grid', () => {
   // 社区
   // 社区编号
-  const commNum = ref(0)
-  // 请求社区信息
-  const commInfo = ref<CommInfo>()
-  const chartData = ref<ChartData>()
-  const getCommInfo = async () => {
-    const res = await getCommInfoAPI({comm_num:commNum.value+1})
-    commInfo.value = res.result
-    chartData.value = JSON.parse(JSON.stringify(commInfo.value.chartData))
+  const commNum = ref<CommonType>(1)
+  const updateCommNum = (val: CommonType) => {
+    commNum.value = val
   }
-  // 人口
-  const popu = computed(() => {
-    const total = commInfo.value?.population.map(x => x.count).reduce((a, b) => a + b, 0) || 1
-    const town = commInfo.value?.population.find(x => x.residence_type === '城镇')?.count || 0
-    const rural = commInfo.value?.population.find(x => x.residence_type === '农村')?.count || 0
-    const townRatio = total && town ? (town / total * 100).toFixed(2) + '%' : 'NaN'
-    const ruralRatio = total && rural ? (rural / total * 100).toFixed(2) + '%' : 'NaN'
-    return { total, town, rural, ruralRatio, townRatio }
-  })
 
   // 网格
   // 网格编号
-  const gridNum=ref(1)
+  const gridNum = ref<CommonType>(1)
+  const updateGridNum = (val: CommonType) => {
+    gridNum.value = val
+  }
 
   // 居民小区
+  // 居民小区编号
+  const buildsNum = ref<CommonType>()
+  const updateBuildsNum = (val: CommonType) => {
+    buildsNum.value = val
+  }
+  // 居民小区楼栋编号
+  const buildNum = ref<CommonType>()
+  const updateBuildNum = (val: CommonType) => {
+    buildNum.value = val
+  }
+  // 居民小区单元编号
+  const unitNum = ref<CommonType>()
+  const updateUnitNum = (val: CommonType) => {
+    unitNum.value = val
+  }
+
+  // 重置状态
+  const resetStates = () => {
+    gridNum.value = undefined
+    buildNum.value = undefined
+    buildNum.value = void 0
+    unitNum.value = void 0
+  }
   return {
     // 社区
-    commNum, commInfo, chartData, popu,getCommInfo,
+    commNum, updateCommNum,
     // 网格
-    gridNum
+    gridNum, updateGridNum,
+    // 居民小区
+    buildsNum, buildNum, unitNum, updateBuildsNum, updateBuildNum, updateUnitNum,
+    // 通用
+    resetStates
   }
 })

@@ -4,8 +4,11 @@
 	import { useGridStore } from '@/store/modules/grid'
 	import { onLoad } from '@dcloudio/uni-app'
 	import { computed, ref } from 'vue'
+	import type { ChartData, CommInfo } from "@/types/home"
+	import { getCommInfoAPI } from "@/service/home"
 
 	const gridStore = useGridStore()
+	const commParams = computed(() => gridStore.commNum || 1)
 
 	// 社区列表
 	const commList = ref<CommItem[]>([])
@@ -14,21 +17,28 @@
 		commList.value = res.result
 	}
 	onLoad(() => {
-		Promise.all([getCommList(), gridStore.getCommInfo()])
+		Promise.all([getCommList(), getCommInfo()])
 	})
 	// 点击社区名称高亮
-	const tabCurrItem = (index : number) => {
-		gridStore.commNum = index
+	const tabCurrItem = (index: string) => {
+		return uni.showToast({ title: '此社区暂无数据', icon: 'error' })
+		gridStore.updateCommNum(index)
 	}
 	// 当前社区名称
 	const curName = computed(() => {
-		return commList.value[gridStore.commNum]?.name + '社区'
+		return commList.value.find(x => x.id === commParams.value)?.name + '社区'
 	})
-
-	const chartData = ref()
+	// 社区信息
 	const opts = ref(uchartCommunity3)
+	const commInfo = ref<CommInfo>()
+	const chartData = ref<ChartData>()
+	const getCommInfo = async () => {
+		const res = await getCommInfoAPI({ comm_num: commParams.value })
+		commInfo.value = res.result
+		chartData.value = JSON.parse(JSON.stringify(commInfo.value.chartData))
+	}
 
-	const onGetIndex = async (e : any) => {
+	const onGetIndex = async (e: any) => {
 		const { cancel } = await uni.showModal({ title: '提示消息', content: '前往查看花名册？' })
 		if (cancel) return
 		console.log(e)
@@ -51,8 +61,8 @@
 					</view>
 				</template>
 				<view class="communities">
-					<view class="community-item" v-for="(item, index) in commList" :key="item.id"
-						:class="{ active: index === gridStore.commNum }" @tap="tabCurrItem(index)">
+					<view class="community-item" v-for="item in commList" :key="item.id"
+						:class="{ active: item.id === gridStore.commNum }" @tap="tabCurrItem(item.id)">
 						<text class="name">{{ item.name }}</text>
 					</view>
 				</view>
@@ -62,34 +72,34 @@
 			<uni-card title="社区概况" :sub-title="curName" extra="" margin="10rpx" padding="10rpx">
 				<view class="community-info">
 					<view class="info-plain">
-						<view class="population">
-							<view class="label">人口：{{ gridStore.popu.total }} </view>
+						<view class="population" v-if="commInfo">
+							<view class="label">人口：{{ commInfo?.total }} </view>
 							<view class="num-town ratio">
 								<view class="ratio-face"
-									:style="{ background: `linear-gradient(to left,transparent ${gridStore.popu.ruralRatio},rgba(39,186,155,0.5) ${gridStore.popu.townRatio})` }">
-									<text>城镇:{{ gridStore.popu.town }}</text>
-									<text>{{ gridStore.popu.townRatio }}</text>
+									:style="{ background: `linear-gradient(to left,transparent ${commInfo.ruralRatio},rgba(39,186,155,0.5) ${commInfo.townRatio})` }">
+									<text>城镇:{{ commInfo?.town }}</text>
+									<text>{{ commInfo?.townRatio }}</text>
 								</view>
 							</view>
 							<view class="num-rural ratio">
 								<view class="ratio-face"
-									:style="{ background: `linear-gradient(to right,rgba(39,186,155,.5) ${gridStore.popu.ruralRatio},transparent ${gridStore.popu.townRatio})` }">
-									<text>农村:{{ gridStore.popu.rural }}</text>
-									<text class="ratio-item">{{ gridStore.popu.ruralRatio }}</text>
+									:style="{ background: `linear-gradient(to right,rgba(39,186,155,.5) ${commInfo.ruralRatio},transparent ${commInfo.townRatio})` }">
+									<text>农村:{{ commInfo.rural }}</text>
+									<text class="ratio-item">{{ commInfo.ruralRatio }}</text>
 								</view>
 							</view>
 						</view>
 						<view class="area">
 							<view class="label">范围：</view>
 							<view class="detail buildings">
-								<uni-tag class="area-item" v-for="item in gridStore.commInfo?.buildingsArea" :key="item.name"
-									:text="item.name" size="normal" inverted type="warning" />
+								<uni-tag class="area-item" v-for="item in commInfo?.buildingsArea" :key="item.name" :text="item.name"
+									size="normal" inverted type="success" />
 							</view>
 						</view>
 					</view>
 					<view class="label">重点人群：</view>
 					<view class="info-chart">
-						<qiun-data-charts type="mount" :opts="opts" :chartData="gridStore.chartData" :optsWatch="false"
+						<qiun-data-charts type="mount" :opts="opts" :chartData="chartData" :optsWatch="false"
 							canvasId="community_info_01" :inScrollView="true" @getIndex="onGetIndex" />
 					</view>
 				</view>
@@ -179,8 +189,14 @@
 				}
 
 				.area {
-					.area-item {
-						margin: 10rpx 4rpx 0 0;
+					.buildings {
+						display: flex;
+						flex-wrap: wrap;
+						justify-content: space-between;
+
+						.area-item {
+							margin: 10rpx 0;
+						}
 					}
 				}
 			}

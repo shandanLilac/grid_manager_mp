@@ -7,46 +7,109 @@
   }
 </script>
 <script setup lang='ts'>
-  import { ref } from 'vue'
+  import { type BuildingsItem, getbuildingAndUnitsAPI, getBuildingsAListAPI, getResidentsListAPI } from '@/service/home'
+  import { useGridStore } from '@/store/modules/grid'
+  import type { PageParams } from '@/types/global'
+  import type { BuildAndUnits, ResidentItem } from '@/types/home'
+  import { onLoad } from '@dcloudio/uni-app'
+  import { computed, ref, watch } from 'vue'
 
-  const value = ref('1-1')
-  const pickerData = ref([
-    {
-      text: '城北小区一号楼',
-      value: '1-0',
-      children: [
-        { text: '1单元', value: '1-1' },
-        { text: '2单元', value: '1-2' },
-        { text: '3单元', value: '1-3' },
-        { text: '4单元', value: '1-4' },
-      ]
-    },
-    {
-      text: '城北小区二号楼',
-      value: '2-0',
-      children: [
-        { text: '1单元', value: '2-1' },
-        { text: '2单元', value: '2-2' },
-        { text: '3单元', value: '2-3' },
-        { text: '4单元', value: '2-4' },
-      ]
-    },
-    {
-      text: '城北小区三号楼',
-      value: '3-0',
-      children: [
-        { text: '1单元', value: '3-1' },
-        { text: '2单元', value: '3-2' },
-        { text: '3单元', value: '3-3' },
-        { text: '4单元', value: '3-4' },
-      ]
-    },
-  ])
+  const gridStore = useGridStore()
+  // 居民小区
+  // 居民小区-请求参数
+  const buildParams = computed(() => {
+    return {
+      comm_num: gridStore.commNum || 1,
+      grid_num: gridStore.gridNum || 1,
+      builds_num: gridStore.buildsNum || 1,
+      build_num: gridStore.buildNum || 1,
+      unit_num: gridStore.unitNum || 1
+    }
+  })
+  const pageParams: Required<PageParams> = {
+    page_num: 1,
+    page_size: 10
+  }
+  const buildingsAList = ref<BuildingsItem[]>()
+  // 小区列表
+  const getBuildingsAList = async () => {
+    const res = await getBuildingsAListAPI(buildParams.value)
+    buildingsAList.value = res.result
+    gridStore.updateBuildsNum(res.result[0].id)
+  }
+  // 重置数据
+  const resetDate = () => {
+    pageParams.page_num = 1
+    residentsList.value = []
+    isAll.value = false
+  }
+  // 切换小区
+  const curIndex = ref(0)
+  const tabBuildings = async (id: number, i: number) => {
+    gridStore.updateBuildsNum(id)
+    resetDate()
+    curIndex.value = i
+    await getBuildingAndUnits()
+    await getResidentsList()
+  }
+
+  // 楼栋单元数据
+  const value = ref<string>()
+  const pickerData = ref<BuildAndUnits[]>()
+  const getBuildingAndUnits = async () => {
+    const res = await getbuildingAndUnitsAPI(buildParams.value)
+    pickerData.value = res.result
+    value.value = res.result[0].children[0].value
+    const buArr = (res.result[0].children[0].value).split('-')
+    console.log(buArr)
+    gridStore.updateBuildNum(buArr[0])
+    gridStore.updateUnitNum(buArr[1])
+    console.log(gridStore.buildNum, gridStore.unitNum)
+    console.log(buildParams.value)
+  }
+  // 居民信息列表数据
+  const residentsList = ref<ResidentItem[]>([])
+  const isAll = ref(false)
+  const extraData = ref<{ total: number, str: string }>()
+  const getResidentsList = async () => {
+    if (isAll.value) return uni.showToast({ icon: 'none', title: '已加载全部' })
+    const res = await getResidentsListAPI({ ...buildParams.value, ...pageParams })
+    residentsList.value!.push(...res.result.result)
+    const { total, str } = res.result
+    extraData.value = { total, str }
+    if (residentsList.value!.length < total) pageParams.page_num++
+    else isAll.value = true
+  }
+
+  // onLoad 钩子函数
+  onLoad(() => {
+    getBuildingsAList()
+    getBuildingAndUnits()
+    getResidentsList()
+  })
+  // 网格数据变化后重新请求数据
+  watch(() => buildParams.value.grid_num, async () => {
+    await getBuildingsAList()
+    await getBuildingAndUnits()
+    await getResidentsList()
+  })
+  // 切换楼栋单元
   const onchange: UniHelper.UniDataPickerOnChange = (e) => {
-    console.log(e)
+    // TODO:更新楼栋、单元信息
+    const buStr = e.detail.value[1].value
+    const buArr = buStr.split('-')
+    gridStore.updateBuildNum(buArr[0])
+    gridStore.updateUnitNum(buArr[1])
+    getResidentsList()
   }
   // 居民列表（表格）
   const loading = ref(false)
+
+  // 加载更多
+  defineExpose({
+    getMore: getResidentsList
+  })
+
 </script>
 
 <template>
@@ -56,37 +119,35 @@
     </view>
     <view class="ac-body">
       <!-- 小区、平房区列表 -->
-      <uni-card title="居民小区列表" sub-title="北街社区第一网格">
+      <uni-card title="居民小区列表" :sub-title="extraData?.str.match(/(\S*)网格/)?.[0]" margin="10rpx">
         <view class="area-list">
-          <uni-tag text="城北小区" type="error" :inverted="true" :circle="true"></uni-tag>
-          <uni-tag text="邮政家属楼" type="error" :inverted="true" :circle="true"></uni-tag>
-          <uni-tag text="城关小学对面平房" type="error" :inverted="true" :circle="true"></uni-tag>
+          <uni-tag type="success" circle :inverted="index !== curIndex" v-for="(item, index) in buildingsAList"
+            :key="item.id" :text="item.name" @tap="tabBuildings(item.id, index)" />
         </view>
       </uni-card>
       <!-- 级联选择器：楼栋 - 单元 -->
-      <uni-card title="请选择楼栋-单元" sub-title="北街社区第一网格城北小区">
+      <uni-card title="请选择楼栋-单元" margin="10rpx">
         <view class="data-picker-wrapper">
           <uni-data-picker v-model="value" :localdata="pickerData" popup-title="请选择楼栋-单元" @change="onchange" />
         </view>
       </uni-card>
-      <uni-card title="居民信息列表" sub-title="北街社区第一网格城北小区1号楼1单元">
-        <!-- <uni-section title="居民信息列表" sub-title="北街社区第一网格城北小区1号楼1单元" type="square"> -->
+      <uni-card title="居民信息列表" :sub-title="extraData?.str" margin="10rpx">
         <view class="data-list">
           <uni-table :loading="loading" stripe empty-text="暂无更多数据">
             <uni-tr>
-              <uni-th width="64" align="center">室</uni-th>
-              <uni-th width="64" align="center">姓名</uni-th>
-              <uni-th width="64" align="center">与户主关系</uni-th>
-              <uni-th width="204" align="center">户籍</uni-th>
-              <uni-th width="64" align="center">备注</uni-th>
-              <uni-th width="264" align="center">操作</uni-th>
+              <uni-th align="center" width="64">室</uni-th>
+              <uni-th align="center" width="64">姓名</uni-th>
+              <uni-th align="center" width="64">与户主关系</uni-th>
+              <uni-th align="center" width="64">户籍</uni-th>
+              <uni-th align="center" width="64">备注</uni-th>
+              <uni-th align="center" width="264">操作</uni-th>
             </uni-tr>
-            <uni-tr>
-              <uni-td align="center">101</uni-td>
-              <uni-td align="center">黄华</uni-td>
-              <uni-td align="center">户主</uni-td>
-              <uni-td>甘肃省山丹县清泉镇城北小区1-1-101</uni-td>
-              <uni-td align="center">低保</uni-td>
+            <uni-tr v-for="(item, index) in residentsList" :key="item.id">
+              <uni-td align="center">{{ item.room_num }}</uni-td>
+              <uni-td align="center">{{ item.name }}</uni-td>
+              <uni-td align="center">{{ item.householder }}</uni-td>
+              <uni-td align="center">{{ item.residence_type }}</uni-td>
+              <uni-td align="center">{{ item.tag }}</uni-td>
               <uni-td>
                 <view class="uni-group">
                   <button class="uni-button" size="mini" type="primary" plain>详情</button>
@@ -97,8 +158,8 @@
             </uni-tr>
           </uni-table>
         </view>
-        <!-- </uni-section> -->
       </uni-card>
+      <view class="loading-text">{{ isAll ? '已加载全部数据' : '加载更多' }}</view>
     </view>
   </view>
 </template>
@@ -129,6 +190,13 @@
           justify-content: space-around;
           align-items: center;
         }
+      }
+
+      .loading-text {
+        text-align: center;
+        font-style: 24rpx;
+        color: #666;
+        padding: 20rpx 0;
       }
     }
   }

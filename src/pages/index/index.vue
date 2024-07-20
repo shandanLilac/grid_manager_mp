@@ -3,23 +3,23 @@
   import NavBar from "./components/NavBar.vue"
   import GridList from "./components/GridList.vue"
   import ResidentialArea from "./components/ResidentialArea.vue"
+  import { ref } from "vue"
 
-  // const onScroll: UniHelper.ScrollViewOnScroll = (e) => {
-  //   console.log(e)
-  // }
+  // 滑动到底事件
+  const residentsRef = ref()
+  const onScrollToLower = () => {
+    residentsRef.value.getMore()
+  }
 </script>
 
 <template>
   <view class="viewport">
     <NavBar />
-    <scroll-view class="scroll-view" scroll-y enable-flex>
+    <scroll-view class="scroll-view" scroll-y enable-flex @scrolltolower="onScrollToLower">
       <GridSwiper />
       <CommunityList />
       <GridList />
-      <ResidentialArea />
-      <view class="page-bottom">
-        ---- 到底了 ----
-      </view>
+      <ResidentialArea ref="residentsRef" />
     </scroll-view>
   </view>
 </template>
@@ -40,13 +40,5 @@
   .scroll-view {
     flex: 1;
     overflow: hidden;
-  }
-
-  .page-bottom {
-    height: 84rpx;
-    line-height: 84rpx;
-    text-align: center;
-    color: #999;
-    font-size: 28rpx;
   }
 </style>
