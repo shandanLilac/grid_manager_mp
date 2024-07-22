@@ -67,16 +67,18 @@
         <!-- 网格员 -->
         <view class="grid-manager grid-item">
           <view class="label">网格员</view>
-          <view class="detail" v-for="item in gridManagerInfo" :key="item.id">
-            <uni-collapse>
+          <view class="gm-wrapper" v-for="item in gridManagerInfo" :key="item.id">
+            <uni-collapse class="uni-collapse">
               <uni-collapse-item :title="item.name + ' ' + item.phone">
-                <view>姓名：{{ item.name }}</view>
-                <view>性别：{{ item.gender }}</view>
-                <view>身份证号码：{{ item.id_card }}</view>
-                <view>电话：{{ item.phone }}</view>
-                <view>类别：{{ item.type }}</view>
-                <view>政治面貌：{{ item.political_type }}</view>
-                <view>分配日期：{{ item.date }}</view>
+                <view class="colla-content">
+                  <view>姓名：{{ item.name }}</view>
+                  <view>性别：{{ item.gender }}</view>
+                  <view>身份证号码：{{ item.id_card }}</view>
+                  <view>电话：{{ item.phone }}</view>
+                  <view>类别：{{ item.type }}</view>
+                  <view>政治面貌：{{ item.political_type }}</view>
+                  <view>分配日期：{{ item.date }}</view>
+                </view>
               </uni-collapse-item>
             </uni-collapse>
           </view>
@@ -108,6 +110,16 @@
       .grid-item {
         margin-bottom: 20rpx;
         @include indexInfoDetail();
+
+        .gm-wrapper {
+          .uni-collapse {
+            width: 100%;
+          }
+
+          .colla-content {
+            padding-left: 30rpx;
+          }
+        }
       }
 
       .grid-info {

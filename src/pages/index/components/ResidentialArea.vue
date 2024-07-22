@@ -61,11 +61,8 @@
     pickerData.value = res.result
     value.value = res.result[0].children[0].value
     const buArr = (res.result[0].children[0].value).split('-')
-    console.log(buArr)
     gridStore.updateBuildNum(buArr[0])
     gridStore.updateUnitNum(buArr[1])
-    console.log(gridStore.buildNum, gridStore.unitNum)
-    console.log(buildParams.value)
   }
   // 居民信息列表数据
   const residentsList = ref<ResidentItem[]>([])
@@ -89,6 +86,7 @@
   })
   // 网格数据变化后重新请求数据
   watch(() => buildParams.value.grid_num, async () => {
+    resetDate()
     await getBuildingsAList()
     await getBuildingAndUnits()
     await getResidentsList()
@@ -100,15 +98,22 @@
     const buArr = buStr.split('-')
     gridStore.updateBuildNum(buArr[0])
     gridStore.updateUnitNum(buArr[1])
+    resetDate()
     getResidentsList()
   }
-  // 居民列表（表格）
-  const loading = ref(false)
 
   // 加载更多
   defineExpose({
     getMore: getResidentsList
   })
+
+  // 看看居民详情
+  const toManDetail = (id: number, addr: string, room: string) => {
+    const paramsStr = JSON.stringify(buildParams.value)
+    uni.navigateTo({
+      url: `/pages/details/man-detail?id=${id}&addr=${addr}&room=${room}&params=${paramsStr}`
+    })
+  }
 
 </script>
 
@@ -133,26 +138,26 @@
       </uni-card>
       <uni-card title="居民信息列表" :sub-title="extraData?.str" margin="10rpx">
         <view class="data-list">
-          <uni-table :loading="loading" stripe empty-text="暂无更多数据">
+          <uni-table class="uni-table" stripe empty-text="暂无更多数据">
             <uni-tr>
               <uni-th align="center" width="64">室</uni-th>
               <uni-th align="center" width="64">姓名</uni-th>
               <uni-th align="center" width="64">与户主关系</uni-th>
               <uni-th align="center" width="64">户籍</uni-th>
-              <uni-th align="center" width="64">备注</uni-th>
-              <uni-th align="center" width="264">操作</uni-th>
+              <uni-th align="center" width="90">备注</uni-th>
+              <uni-th align="center" width="180">操作</uni-th>
             </uni-tr>
-            <uni-tr v-for="(item, index) in residentsList" :key="item.id">
+            <uni-tr v-for="item in residentsList" :key="item.id">
               <uni-td align="center">{{ item.room_num }}</uni-td>
               <uni-td align="center">{{ item.name }}</uni-td>
               <uni-td align="center">{{ item.householder }}</uni-td>
               <uni-td align="center">{{ item.residence_type }}</uni-td>
-              <uni-td align="center">{{ item.tag }}</uni-td>
+              <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
               <uni-td>
                 <view class="uni-group">
-                  <button class="uni-button" size="mini" type="primary" plain>详情</button>
-                  <button class="uni-button" size="mini" type="primary">修改</button>
-                  <button class="uni-button" size="mini" type="warn">删除</button>
+                  <button class="btn detail" @tap="toManDetail(item.id, extraData!.str, item.room_num)">详情</button>
+                  <button class="btn modify">修改</button>
+                  <button class="btn delete">删除</button>
                 </view>
               </uni-td>
             </uni-tr>
@@ -187,8 +192,26 @@
       .data-list {
         .uni-group {
           display: flex;
-          justify-content: space-around;
+          justify-content: space-between;
           align-items: center;
+
+          .btn {
+            background-color: transparent;
+            border: unset;
+            font-size: 24rpx;
+          }
+
+          .detail {
+            color: $GridColor;
+          }
+
+          .modify {
+            color: $warnColor;
+          }
+
+          .delete {
+            color: $dangerColor;
+          }
         }
       }
 

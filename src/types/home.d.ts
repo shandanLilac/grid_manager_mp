@@ -56,7 +56,7 @@ export type ResidentsList = {
   total: number
   str: string
 }
-type ResidentItem = {
+export type ResidentItem = {
   building_num: string
   buildings_area: string
   doing: string

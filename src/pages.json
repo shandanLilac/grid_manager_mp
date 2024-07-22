@@ -26,9 +26,15 @@
 			}
 		},
 		{
-			"path":"pages/details/art-detail",
+			"path": "pages/details/art-detail",
 			"style": {
 				"navigationBarTitleText": "文章详情"
+			}
+		},
+		{
+			"path": "pages/details/man-detail",
+			"style": {
+				"navigationBarTitleText": "居民详情"
 			}
 		}
 	],
