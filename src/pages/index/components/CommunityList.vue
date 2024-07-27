@@ -53,13 +53,13 @@
 		</view>
 		<view class="cc-body">
 			<!-- 社区列表 -->
-			<uni-card margin="10rpx" padding="10rpx">
-				<template #title>
+			<uni-card title="社区列表" thumbnail="/static/imgs/中国结.png" margin="10rpx" padding="10rpx">
+				<!-- <template #title>
 					<view class="title-slot">
 						<text class="iconfont icon-zhongguojie"></text>
 						<text class="title">社区列表</text>
 					</view>
-				</template>
+				</template> -->
 				<view class="communities">
 					<view class="community-item" v-for="item in commList" :key="item.id"
 						:class="{ active: item.id === gridStore.commNum }" @tap="tabCurrItem(item.id)">
@@ -114,18 +114,6 @@
 
 		.cc-head {
 			@include commonHead();
-		}
-
-		.title-slot {
-			padding: 20rpx;
-			border-bottom: 1px solid #e7e7e7;
-
-			.iconfont {
-				margin-right: 20rpx;
-				font-size: 48rpx;
-				font-weight: 700;
-				color: red;
-			}
 		}
 
 		.communities {

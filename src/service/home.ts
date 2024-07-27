@@ -1,6 +1,6 @@
 import http from '@/utils/http'
-import type { BuildAndUnits, CommInfo, GridManagerInfo, NewsResult, ResidentsList } from '@/types/home'
-import type{ PageParams } from '@/types/global'
+import type { BuildAndUnits, CommInfo, GridManagerInfo, NewsResult, ResidentItem, ResidentsList } from '@/types/home'
+import type { PageParams } from '@/types/global'
 
 // 轮播图news列表
 export type NewsList = Pick<NewsResult, 'id' | 'title' | 'imgUrl'>
@@ -46,11 +46,12 @@ export const getGridNumAPI = (id: number = 1) => {
 }
 // 网格员信息
 export type GridMIParam = {
-  comm_num?: number|string
-  grid_num?: number|string
-  builds_num?:number|string
-  build_num?:number|string
-  unit_num?:number|string
+  comm_num?: number | string
+  grid_num?: number | string
+  builds_num?: number | string
+  build_num?: number | string
+  unit_num?: number | string
+  room_num?: number | string
 }
 export const getGridManagerInfoAPI = (data: GridMIParam) => {
   return http.get<GridManagerInfo[]>('/api/grid_manager_info', data)
@@ -62,18 +63,22 @@ export const getGridChartDataAPI = (data: GridMIParam) => {
 
 // 居民小区
 // 1.居民小区列表
-export type BuildingsItem={
-  id:number
-  name:string
+export type BuildingsItem = {
+  id: number
+  name: string
 }
-export const getBuildingsAListAPI = (data:GridMIParam) => {
+export const getBuildingsAListAPI = (data: GridMIParam) => {
   return http.get<BuildingsItem[]>('/api/buildingsA_list', data)
 }
 // 2.居民小区-楼栋单元列表
-export const getbuildingAndUnitsAPI=(data:GridMIParam) => {
-  return http.get<BuildAndUnits[]>('/api/building_units',data)
+export const getbuildingAndUnitsAPI = (data: GridMIParam) => {
+  return http.get<BuildAndUnits[]>('/api/building_units', data)
 }
-// 3.居民小区-居民
-export const getResidentsListAPI=(data:GridMIParam&PageParams) => {
-  return http.get<ResidentsList>('/api/residents_list',data)
+// 3.居民小区-居民列表
+export const getResidentsListAPI = (data: GridMIParam & PageParams) => {
+  return http.get<ResidentsList>('/api/residents_list', data)
+}
+// 4.居民小区-居民信息
+export const getResidentDetailAPI = (data: GridMIParam) => {
+  return http.get<ResidentItem[]>('/api/resident_detail', data)
 }
