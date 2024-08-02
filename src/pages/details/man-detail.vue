@@ -8,13 +8,17 @@
 <script setup lang=ts>
 	import { getResidentDetailAPI } from '@/service/home'
 	import type { ResidentItem } from '@/types/home'
-	import { onBackPress, onLoad } from '@dcloudio/uni-app'
+	import { onBackPress, onLoad, onShow } from '@dcloudio/uni-app'
 	import { ref } from 'vue'
 	import { unifabContent, unifabPattern } from './material/unifab-content'
 	import type { VisitForm, VisitItem } from '@/types/details'
 	import { updateVisitNoteAPI } from '@/service/detail'
+	import { formRules } from './material/formRules'
+	import TnRadio from '@tuniao/tnui-vue3-uniapp/components/radio/src/radio.vue'
+	import TnRadioGroup from '@tuniao/tnui-vue3-uniapp/components/radio/src/radio-group.vue'
+	import type { TnFormInstance } from '@tuniao/tnui-vue3-uniapp'
 
-	// 页面参数
+	// 页面安全距离
 	const { safeAreaInsets } = uni.getSystemInfoSync()
 
 	// 接收路径参数
@@ -23,9 +27,11 @@
 		addr?: string
 		room?: string
 		params?: string
+		comm_num?: string | number
 	}>()
 	// 组装请求参数
 	const params = { ...JSON.parse(query.params!), room_num: query.room }
+	const tags = ref<string[]>([])
 	// 入户信息
 	const visitInfo = ref<VisitItem[]>()
 	const visitType = [{ val: 0, text: '走访入户' }, { val: 1, text: '电话入户' }, { val: 2, text: '其他入户' }]
@@ -35,9 +41,22 @@
 		const res = await getResidentDetailAPI(params)
 		familyMemList.value = res.result
 		visitInfo.value = res.result.find(x => x.householder === '户主')?.visit
+		if (tags.value.length > 0) tags.value = []
+		familyMemList.value.forEach(x => {
+			if (x.tag?.length) {
+				x.tag.forEach(v => tags.value.push(v))
+			}
+			if (x.id_card) {
+				x.gender = Number(x.id_card.at(-2)) * 1 % 2 === 0 ? '女' : '男'
+				x.age = new Date().getFullYear() - Number(x.id_card.slice(6, 10))
+			}
+		})
 	}
 
 	onLoad(() => {
+		getResidentDetail()
+	})
+	onShow(() => {
 		getResidentDetail()
 	})
 
@@ -47,71 +66,70 @@
 	const popupRef = ref<UniHelper.UniPopupInstance>()
 	onBackPress(() => {
 		if (fabRef.value!.isShow) {
-			fabRef.value.close()
+			fabRef.value?.close()
 			return true
 		}
 		return false
 	})
 	const onFabTrigger: UniHelper.UniFabOnTrigger = (e) => {
-		fabContent.value.forEach(x => x.active = false)
-		unifabContent[e.index].active = true
-		// fabRef.value.close()
-		// 若点击更新按钮，则跳转到页面，更新id为props.id的数据，若点击入户按钮，则弹窗录入
-		// 0-更新，1-入户
+		// 0-新增，1-修改，2-入户
 		if (e.index === 0) {
+			// uni.navigateTo({ url: `/modules/handle-info/index` })
+			// 报错了！没解决。{"errMsg":"navigateTo:fail timeout"} ，不影响运行，且主包不会报错，使用标签也不会报错。2024-7-30
+			uni.navigateTo({ url: `/pages/handle-info/index?params=${query.params}&room=${query.room}&comm_num=${query.comm_num}` })
 		} else if (e.index === 1) {
+			// console.log('modify')
+			uni.navigateTo({ url: `/pages/handle-info/index?type=m1&data=${JSON.stringify(familyMemList.value.find(x => x.id == query.id))}&comm_num=${query.comm_num}` })
+		} else if (e.index === 2) {
 			// (popupRef.value as UniHelper.UniPopupInstance).open()
 			// popupRef.value?.open()
 			popupRef.value?.open!('bottom')
 		}
+		// fabContent.value.forEach(x => x.active = false)
+		// fabRef.value.close()
 	}
 	// 表单数据
-	const formRef = ref<UniHelper.UniFormsInstance>()
+	const formRef = ref<TnFormInstance>()
 	const formData = ref<VisitForm>({
 		mainName: '',
-		value: 0,
-		type: [{ value: 0, text: '走访' }, { value: 1, text: '电话' }, { value: 3, text: '其他' }],
+		type: '走访',
 		isSingle: false,
 		subName: '',
 		note: ''
 	})
-	// 改变入户类型
-	const toogleVisiType: UniHelper.UniDataCheckboxSingleOnChange = (e) => {
-		console.log(e)
-		formData.value.value = e.detail.value
-	}
-	// 改变入户人数
-	const toogleSingle = (e: any) => {
-		console.log(e)
-		formData.value.isSingle = e.detail.value
-	}
+
 	// 入户弹出层：重置
 	const resetForm = () => {
 		formData.value = Object.assign(formData.value, {
 			mainName: '',
-			value: 0,
+			type: '走访',
 			isSingle: false,
 			subName: '',
 			note: ''
 		})
 	}
 	// 入户弹出层：提交
-	const submitForm = async () => {
+	const submitForm = () => {
 		// 验证表单数据
-		// 提交数据
-		const { type, ...subData } = formData.value
-		const id = familyMemList.value[0].id
-		const comm_num = params.comm_num
-		const res = await updateVisitNoteAPI({ ...subData as VisitForm, id, comm_num })
-		console.log(res)
-		resetForm()
-		popupRef.value!.close!()
+		formRef.value?.validate(async (valid: any) => {
+			console.log(formData.value)
+			if (!valid) return uni.showToast({ title: '表单校验失败', icon: 'none', })
+			// 提交数据
+			// const { type, ...subData } = formData.value
+			const id = familyMemList.value[0].id
+			const comm_num = params.comm_num
+			await updateVisitNoteAPI({ ...formData.value, id, comm_num })
+			resetForm()
+			getResidentDetail()
+			popupRef.value!.close!()
+		})
+
 	}
 </script>
 
 <template>
-	<view class="man-detail">
-		<view class="grid_bg" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
+	<view class="man-detail" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
+		<view class="grid_bg">
 			<view class="family-wrapper" v-if="familyMemList.length">
 				<!-- 1.家庭-标签 -->
 				<view class="family-tag">
@@ -125,17 +143,26 @@
 					</view>
 					<view class="tag-item">
 						<uni-tag :mark="true" size="small" text="类型" type="error" />
-						<view class="value">{{ familyMemList[0].tag || '正常' }}</view>
+						<view class="value">{{ tags.join('、') || '正常' }}</view>
 					</view>
 				</view>
 				<!-- 2.家庭-成员 -->
 				<view class="family-mems">
 					<uni-collapse accordion>
 						<template v-for="item in familyMemList" :key="item.id">
-							<uni-collapse-item :title="item.householder" :open="item.id == query.id" :show-animation="false">
-								<view class="mem-item">
-									<text class="mem-key">姓名</text>
-									<text class="mem-val">{{ item.name }}</text>
+							<uni-collapse-item :title="item.householder + '-' + item.name" :open="item.id == query.id"
+								:show-animation="false">
+								<view class="mem-item name">
+									<view class="item-name">
+										<text class="mem-key">姓名</text>
+										<text class="mem-val" v-if="item.id_card">{{ item.name }}({{ item.gender }},{{ item.age }}岁)</text>
+									</view>
+									<navigator
+										:url="`/pages/handle-info/index?type=m1&data=${JSON.stringify(item)}&comm_num=${query.comm_num}`"
+										hover-class="none">
+										<text class="editor">编辑</text>
+										<text class="iconfont icon-youjiantou"></text>
+									</navigator>
 								</view>
 								<view class="mem-item">
 									<text class="mem-key">民族</text>
@@ -181,6 +208,10 @@
 									<text class="mem-key">宗教信仰</text>
 									<text class="mem-val">{{ item.religion }}</text>
 								</view>
+								<view class="mem-item">
+									<text class="mem-key">标注</text>
+									<text class="mem-val">{{ item.tag?.join('、') }}</text>
+								</view>
 							</uni-collapse-item>
 						</template>
 					</uni-collapse>
@@ -194,9 +225,7 @@
 						<view class="empty" v-if="!familyMemList[0].notes">
 							<text class="text">暂无内容</text>
 						</view>
-						<view class="detail" v-else>
-
-						</view>
+						<view class="detail" v-else></view>
 					</uni-card>
 				</view>
 				<!-- 4.家庭-入户记录 -->
@@ -228,7 +257,7 @@
 												</view>
 												<view class="item">
 													<text class="key">入户类型：</text>
-													<text class="val">{{ visitType.find(x => x.val === item.value)?.text }}</text>
+													<text class="val">{{ item.type }}</text>
 												</view>
 												<view class="item">
 													<text class="key">入户笔记：</text>
@@ -251,31 +280,34 @@
 				<view class="popup-wrapper">
 					<view class="title">填写入户记录</view>
 					<view class="form">
-						<uni-forms ref="formRef" :modelValue="formData">
-							<uni-forms-item class="form-item" label="姓名" name="name">
-								<uni-easyinput type="text" trim="both" v-model.lazy="formData.mainName" placeholder="请输入姓名"
-									:styles="{ border: 'none' }" />
-							</uni-forms-item>
-							<uni-forms-item label="类型" name="type">
-								<uni-data-checkbox v-model="formData.value" :localdata="formData.type" mode="default"
-									selected-color="#27ba9b" selectedTextColor="#27ba9b" @change="toogleVisiType" />
-							</uni-forms-item>
-							<uni-forms-item label="单人入户" name="">
-								<switch :checked="formData.isSingle" color="#27ba9b" @change="toogleSingle" />
-							</uni-forms-item>
-							<uni-forms-item label="陪同人员" name="" v-if="!formData.isSingle">
-								<uni-easyinput v-model.lazy="formData.subName" type="text" placeholder="请输入陪同入户人员姓名" />
-							</uni-forms-item>
-							<uni-forms-item label="入户记录" name="">
-								<view class="">
-									<uni-easyinput v-model.lazy="formData.note" type="textarea" maxlength="140" />
-								</view>
-							</uni-forms-item>
-						</uni-forms>
-						<view class="btns-wrapper">
-							<button class="btn reset" @click="resetForm">重置</button>
-							<button class="btn submit" @click="submitForm">提交</button>
-						</view>
+						<!-- 表单 -->
+						<tn-form ref="formRef" :model="formData" :rules="formRules" label-width="140" label-position="right"
+							status-icon>
+							<tn-form-item label="姓名" prop="mainName">
+								<tn-input type="text" v-model="formData.mainName" placeholder="请输入姓名" underline />
+							</tn-form-item>
+							<tn-form-item label="类型" prop="type">
+								<TnRadioGroup v-model="formData.type">
+									<TnRadio active-color="#ff1744" label="走访">走访</TnRadio>
+									<TnRadio active-color="#1de9b6" label="电话">电话</TnRadio>
+									<TnRadio active-color="#9e9e9e" label="其他">其他</TnRadio>
+								</TnRadioGroup>
+							</tn-form-item>
+							<tn-form-item label="单人入户" prop="isSingle">
+								<tn-switch v-model="formData.isSingle" shape="square" size="sm" active-color="#27ba9b" />
+							</tn-form-item>
+							<tn-form-item label="陪同人员" prop="subName" v-if="!formData.isSingle">
+								<tn-input v-model.lazy="formData.subName" placeholder="请输入陪同入户人员姓名" underline />
+							</tn-form-item>
+							<tn-form-item label="入户记录" prop="note">
+								<tn-input type="textarea" height="200" v-model="formData.note" placeholder="入户记录（2-200字）" />
+							</tn-form-item>
+							<view class="btns-wrapper">
+								<button class="btn reset" @click="resetForm">重置</button>
+								<button class="btn submit" @click="submitForm">提交</button>
+							</view>
+						</tn-form>
+
 					</view>
 				</view>
 			</uni-popup>
@@ -369,7 +401,8 @@
 				// 	background-color: unset;
 				// }
 
-				.mem-item {
+				.mem-item,
+				.item-name {
 					padding-left: 32rpx;
 					display: flex;
 					align-items: center;
@@ -382,6 +415,20 @@
 						text-align-last: justify;
 						font-weight: 500;
 						color: $GridColor;
+					}
+				}
+
+				.name {
+					display: flex;
+					justify-content: space-between;
+
+					.item-name {
+						padding-left: 0;
+					}
+
+					.editor,
+					.iconfont {
+						color: $warnColor;
 					}
 				}
 			}

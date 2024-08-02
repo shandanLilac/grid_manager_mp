@@ -7,6 +7,7 @@
   }
 </script>
 <script setup lang='ts'>
+  import { dropItemAPI } from '@/service/detail'
   import { type BuildingsItem, getbuildingAndUnitsAPI, getBuildingsAListAPI, getResidentsListAPI } from '@/service/home'
   import { useGridStore } from '@/store/modules/grid'
   import type { PageParams } from '@/types/global'
@@ -38,7 +39,7 @@
     gridStore.updateBuildsNum(res.result[0].id)
   }
   // 重置数据
-  const resetDate = () => {
+  const resetData = () => {
     pageParams.page_num = 1
     residentsList.value = []
     isAll.value = false
@@ -47,7 +48,7 @@
   const curIndex = ref(0)
   const tabBuildings = async (id: number, i: number) => {
     gridStore.updateBuildsNum(id)
-    resetDate()
+    resetData()
     curIndex.value = i
     await getBuildingAndUnits()
     await getResidentsList()
@@ -86,7 +87,7 @@
   })
   // 网格数据变化后重新请求数据
   watch(() => buildParams.value.grid_num, async () => {
-    resetDate()
+    resetData()
     await getBuildingsAList()
     await getBuildingAndUnits()
     await getResidentsList()
@@ -98,6 +99,7 @@
     const buArr = buStr.split('-')
     gridStore.updateBuildNum(buArr[0])
     gridStore.updateUnitNum(buArr[1])
+    resetData()
     getResidentsList()
   }
 
@@ -107,11 +109,21 @@
   })
 
   // 看看居民详情
-  const toManDetail = (id: number, addr: string, room: string) => {
+  const toManDetail = (id?: number, addr?: string, room?: string) => {
     const paramsStr = JSON.stringify(buildParams.value)
     uni.navigateTo({
-      url: `/pages/details/man-detail?id=${id}&addr=${addr}&room=${room}&params=${paramsStr}`
+      url: `/pages/details/man-detail?id=${id}&addr=${addr}&room=${room}&params=${paramsStr}&comm_num=${buildParams.value.comm_num}`
     })
+  }
+  // 删除居民信息
+  const dropItem = async (id: number) => {
+    const { confirm } = await uni.showModal({
+      icon: 'fail',
+      title: '警告',
+      content: '不可逆操作，是否继续？'
+    })
+    if (!confirm) return uni.showToast({ icon: 'none', title: '已取消' })
+    await dropItemAPI(id, buildParams.value.comm_num)
   }
 
 </script>
@@ -146,7 +158,8 @@
               <uni-th align="center" width="90">备注</uni-th>
               <uni-th align="center" width="180">操作</uni-th>
             </uni-tr>
-            <uni-tr v-for="item in residentsList" :key="item.id" @tap="toManDetail(item.id, extraData!.str, item.room_num)">
+            <uni-tr v-for="item in residentsList" :key="item.id"
+              @tap="toManDetail(item.id, extraData!.str, item.room_num)">
               <uni-td align="center">{{ item.room_num }}</uni-td>
               <uni-td align="center">{{ item.name }}</uni-td>
               <uni-td align="center">{{ item.householder }}</uni-td>
@@ -154,9 +167,12 @@
               <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
               <uni-td>
                 <view class="uni-group">
-                  <button class="btn detail" @tap.stop="toManDetail(item.id, extraData!.str, item.room_num)">详情</button>
-                  <button class="btn modify" @tap.stop="()=>{console.log('M')}">修改</button>
-                  <button class="btn delete" @tap.stop="()=>{console.log('S')}">删除</button>
+                  <text class="btn detail" @tap.stop="toManDetail(item.id, extraData!.str, item.room_num)">详情</text>
+                  <navigator :url="`/pages/handle-info/index?type=m0&id=${item.id}&comm_num=${buildParams.comm_num}`"
+                    hover-class="none">
+                    <text class="btn modify">编辑</text>
+                  </navigator>
+                  <text class="btn delete" @tap.stop="dropItem(item.id!)">删除</text>
                 </view>
               </uni-td>
             </uni-tr>

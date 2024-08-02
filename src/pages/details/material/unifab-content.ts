@@ -1,19 +1,19 @@
 export const unifabContent = [
   {
-    iconPath: '/static/imgs/create.png',
-    selectedIconPath: '/static/imgs/create-active.png',
+    iconPath: '/static/imgs/create-active.png',
+    // selectedIconPath: '/static/imgs/create-active.png',
     text: '新增',
     active: false
   },
   {
-    iconPath: '/static/imgs/record.png',
-    selectedIconPath: '/static/imgs/record-active.png',
-    text: '修改',
+    iconPath: '/static/imgs/record-active.png',
+    // selectedIconPath: '/static/imgs/record-active.png',
+    text: '编辑',
     active: false
   },
   {
-    iconPath: '/static/imgs/visit.png',
-    selectedIconPath: '/static/imgs/visit-active.png',
+    iconPath: '/static/imgs/visit-active.png',
+    // selectedIconPath: '/static/imgs/visit-active.png',
     text: '入户',
     active: false
   }

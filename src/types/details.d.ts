@@ -1,14 +1,10 @@
 // men-detail：入户表单
 export type VisitForm = {
-	mainName : string
-	value : number | string
-	type : {
-		value : number
-		text : '走访' | '电话' | '其他'
-	}[]
-	isSingle : boolean
-	subName : string
-	note : string
+	mainName: string
+	type: '走访' | '电话' | '其他'
+	isSingle: boolean
+	subName: string
+	note: string
 }
 const formData = ref({
 	mainName?: '',
@@ -20,13 +16,9 @@ const formData = ref({
 })
 
 // 入户信息
-export type VisitItem = {
-	mainName ?: string
-	date ?: string
-	type ?: string
-	subName ?: string
-	note ?: string
-	value ?: number
-	id ?: number | string
-	comm_num ?: number | string
+export type VisitItem = VisitForm & {
+	id?: number | string
+	comm_num?: number | string
+	date?: string
+	value?: number
 }

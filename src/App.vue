@@ -15,6 +15,7 @@
 <style lang="scss">
   // 字体图标
   @import '@/static/fonts/iconfont.css';
+  @import '@tuniao/tn-style/dist/uniapp/index.css';
 
   view,
   navigator,

@@ -3,7 +3,6 @@
   import { gridChartOpts } from '@/static/config/ucharts-opts'
   import { onReady } from '@dcloudio/uni-app'
   import { getGridChartDataAPI, getGridManagerInfoAPI, getGridNumAPI, type GridItem, } from '@/service/home'
-  import type { UniDataSelectOnChange } from '@uni-helper/uni-ui-types/index';
   import type { GridManagerInfo } from '@/types/home';
   import { useGridStore } from '@/store/modules/grid'
 
