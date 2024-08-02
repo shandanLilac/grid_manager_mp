@@ -150,33 +150,37 @@
       <uni-card title="居民信息列表" :sub-title="extraData?.str" margin="10rpx">
         <view class="data-list">
           <uni-table class="uni-table" stripe empty-text="暂无更多数据">
-            <uni-tr>
-              <uni-th align="center" width="64">室</uni-th>
-              <uni-th align="center" width="64">姓名</uni-th>
-              <uni-th align="center" width="64">与户主关系</uni-th>
-              <uni-th align="center" width="64">户籍</uni-th>
-              <uni-th align="center" width="90">备注</uni-th>
-              <uni-th align="center" width="180">操作</uni-th>
-            </uni-tr>
-            <uni-tr v-for="item in residentsList" :key="item.id"
-              @tap="toManDetail(item.id, extraData!.str, item.room_num)">
-              <uni-td align="center">{{ item.room_num }}</uni-td>
-              <uni-td align="center">{{ item.name }}</uni-td>
-              <uni-td align="center">{{ item.householder }}</uni-td>
-              <uni-td align="center">{{ item.residence_type }}</uni-td>
-              <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
-              <uni-td>
-                <view class="uni-group">
-                  <text class="btn detail" @tap.stop="toManDetail(item.id, extraData!.str, item.room_num)">详情</text>
-                  <navigator :url="`/pages/handle-info/index?type=m0&id=${item.id}&comm_num=${buildParams.comm_num}`"
-                    hover-class="none">
-                    <text class="btn modify">编辑</text>
-                  </navigator>
-                  <text class="btn delete" @tap.stop="dropItem(item.id!)">删除</text>
-                </view>
-              </uni-td>
-            </uni-tr>
-          </uni-table>
+            <uni-table class="uni-table" stripe empty-text="暂无更多数据">
+              <uni-tr>
+                <uni-th align="center" width="64">室</uni-th>
+                <uni-th align="center" width="64">姓名</uni-th>
+                <uni-th align="center" width="64">与户主关系</uni-th>
+                <uni-th align="center" width="64">户籍</uni-th>
+                <uni-th align="center" width="90">备注</uni-th>
+                <uni-th align="center" width="180">操作</uni-th>
+                <uni-th align="center" width="90">备注</uni-th>
+                <uni-th align="center" width="180">操作</uni-th>
+              </uni-tr>
+              <uni-tr v-for="item in residentsList" :key="item.id"
+                @tap="toManDetail(item.id, extraData!.str, item.room_num)">
+                <uni-td align="center">{{ item.room_num }}</uni-td>
+                <uni-td align="center">{{ item.name }}</uni-td>
+                <uni-td align="center">{{ item.householder }}</uni-td>
+                <uni-td align="center">{{ item.residence_type }}</uni-td>
+                <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
+                <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
+                <uni-td>
+                  <view class="uni-group">
+                    <text class="btn detail" @tap.stop="toManDetail(item.id, extraData!.str, item.room_num)">详情</text>
+                    <navigator :url="`/pages/handle-info/index?type=m0&id=${item.id}&comm_num=${buildParams.comm_num}`"
+                      hover-class="none">
+                      <text class="btn modify">编辑</text>
+                    </navigator>
+                    <text class="btn delete" @tap.stop="dropItem(item.id!)">删除</text>
+                  </view>
+                </uni-td>
+              </uni-tr>
+            </uni-table>
         </view>
       </uni-card>
       <view class="loading-text">{{ isAll ? '已加载全部数据' : '加载更多' }}</view>
@@ -208,7 +212,26 @@
         .uni-group {
           display: flex;
           justify-content: space-between;
+          justify-content: space-between;
           align-items: center;
+
+          .btn {
+            background-color: transparent;
+            border: unset;
+            font-size: 24rpx;
+          }
+
+          .detail {
+            color: $GridColor;
+          }
+
+          .modify {
+            color: $warnColor;
+          }
+
+          .delete {
+            color: $dangerColor;
+          }
 
           .btn {
             background-color: transparent;
