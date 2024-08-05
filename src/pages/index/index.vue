@@ -1,4 +1,4 @@
-<script setup lang=ts>
+<script setup lang="ts">
   import CommunityList from "./components/CommunityList.vue"
   import NavBar from "./components/NavBar.vue"
   import GridList from "./components/GridList.vue"

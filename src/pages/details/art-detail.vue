@@ -1,4 +1,4 @@
-<script setup lang=ts>
+<script setup lang="ts">
   import { getNewsDetailAPI, type NewsDetail } from '@/service/home'
   import { onLoad } from '@dcloudio/uni-app'
   import { ref } from 'vue'

@@ -20,7 +20,8 @@
       "miniprogram-api-typings",
       "@uni-helper/uni-app-types",
       "@uni-helper/uni-ui-types",
-      "@tuniao/tnui-vue3-uniapp/global.d.ts"
+      "@tuniao/tnui-vue3-uniapp/global.d.ts",
+      "wot-design-uni/global"
     ]
   },
   "vueCompilerOptions": {

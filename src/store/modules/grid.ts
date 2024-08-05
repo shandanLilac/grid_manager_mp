@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { ref } from "vue"
 
-type CommonType = string | number | undefined
+export type CommonType = string | number | undefined
 
 export const useGridStore = defineStore('grid', () => {
   // 社区

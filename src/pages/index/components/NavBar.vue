@@ -1,10 +1,19 @@
 <script setup lang="ts">
-// 获取屏幕边界到安全区域距离
-const { safeAreaInsets } = uni.getSystemInfoSync()
+  import { ref } from 'vue'
+
+  // 获取屏幕边界到安全区域距离
+  // const { safeAreaInsets } = uni.getSystemInfoSync()
+  // 报错了：can not read property of null(__global...)
+  const insets = ref()
+  uni.getSystemInfo({
+    success: ({ safeAreaInsets }) => {
+      insets.value = safeAreaInsets
+    },
+  })
 </script>
 
 <template>
-  <view class="navbar" :style="{ paddingTop: safeAreaInsets!.top + 10 + 'px' }">
+  <view class="navbar" :style="{ paddingTop: insets!.top + 10 + 'px' }">
     <!-- logo文字 -->
     <view class="logo">
       <image class="logo-image" src="@/static/imgs/logo1.png"></image>
@@ -19,59 +28,60 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 </template>
 
 <style lang="scss">
-/* 自定义导航条 */
-.navbar {
-  background-image: url(@/static/imgs/navigator_bg.png);
-  background-size: cover;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding-top: 20px;
 
-  .logo {
+  /* 自定义导航条 */
+  .navbar {
+    background-image: url(@/static/imgs/navigator_bg.png);
+    background-size: cover;
+    position: relative;
     display: flex;
-    align-items: center;
-    height: 64rpx;
-    padding-left: 30rpx;
+    flex-direction: column;
+    padding-top: 20px;
 
-    .logo-image {
-      width: 166rpx;
-      height: 39rpx;
+    .logo {
+      display: flex;
+      align-items: center;
+      height: 64rpx;
+      padding-left: 30rpx;
+
+      .logo-image {
+        width: 166rpx;
+        height: 39rpx;
+      }
+
+      .logo-text {
+        flex: 1;
+        line-height: 28rpx;
+        color: #fff;
+        margin: 2rpx 0 0 20rpx;
+        padding-left: 20rpx;
+        border-left: 1rpx solid #fff;
+        font-size: 26rpx;
+      }
     }
 
-    .logo-text {
-      flex: 1;
-      line-height: 28rpx;
+    .search {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10rpx 0 26rpx;
+      height: 64rpx;
+      margin: 16rpx 20rpx;
       color: #fff;
-      margin: 2rpx 0 0 20rpx;
-      padding-left: 20rpx;
-      border-left: 1rpx solid #fff;
-      font-size: 26rpx;
+      font-size: 28rpx;
+      border-radius: 16rpx;
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .icon-search {
+      &::before {
+        margin-right: 10rpx;
+      }
+    }
+
+    .icon-scan {
+      font-size: 30rpx;
+      padding: 15rpx;
     }
   }
-
-  .search {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 10rpx 0 26rpx;
-    height: 64rpx;
-    margin: 16rpx 20rpx;
-    color: #fff;
-    font-size: 28rpx;
-    border-radius: 16rpx;
-    background-color: rgba(255, 255, 255, 0.5);
-  }
-
-  .icon-search {
-    &::before {
-      margin-right: 10rpx;
-    }
-  }
-
-  .icon-scan {
-    font-size: 30rpx;
-    padding: 15rpx;
-  }
-}
 </style>

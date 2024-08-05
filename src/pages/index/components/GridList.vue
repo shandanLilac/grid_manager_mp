@@ -45,8 +45,13 @@
     getGridManagerInfo()
     getGridChartData()
   })
-  const getIndex = (e: any) => {
-    console.log(e)
+  const getIndex = async (e: any) => {
+    const { cancel } = await uni.showModal({ title: '提示消息', content: '查看数据列表？' })
+    if (cancel) return
+    // console.log(e) 还有好多属性和方法，有时间慢慢研究研究
+    uni.navigateTo({
+      url: `/modules/handle-data/data-show/special-group?type=2&cate=${e.currentIndex.index}`
+    })
   }
 </script>
 
@@ -87,7 +92,7 @@
           <view class="label">重点人员：</view>
           <view class="chart">
             <qiun-data-charts type="mount" :opts="gridChartOpts" :chartData="chartData" :inScrollView="true"
-              @getIndex="getIndex" />
+              :optsWatch="false" canvasId="grid_info_01" @getIndex="getIndex" />
           </view>
         </view>
       </view>

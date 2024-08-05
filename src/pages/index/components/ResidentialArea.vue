@@ -124,6 +124,8 @@
     })
     if (!confirm) return uni.showToast({ icon: 'none', title: '已取消' })
     await dropItemAPI(id, buildParams.value.comm_num)
+    getResidentsList()
+    uni.showToast({ icon: 'none', title: '删除成功' })
   }
 
 </script>
@@ -157,8 +159,6 @@
               <uni-th align="center" width="64">户籍</uni-th>
               <uni-th align="center" width="90">备注</uni-th>
               <uni-th align="center" width="180">操作</uni-th>
-              <uni-th align="center" width="90">备注</uni-th>
-              <uni-th align="center" width="180">操作</uni-th>
             </uni-tr>
             <uni-tr v-for="item in residentsList" :key="item.id"
               @tap="toManDetail(item.id, extraData!.str, item.room_num)">
@@ -166,7 +166,6 @@
               <uni-td align="center">{{ item.name }}</uni-td>
               <uni-td align="center">{{ item.householder }}</uni-td>
               <uni-td align="center">{{ item.residence_type }}</uni-td>
-              <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
               <uni-td class="uni-td" align="center">{{ item.tag }}</uni-td>
               <uni-td>
                 <view class="uni-group">

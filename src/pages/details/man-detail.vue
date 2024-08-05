@@ -5,7 +5,7 @@
 		}
 	}
 </script>
-<script setup lang=ts>
+<script setup lang="ts">
 	import { getResidentDetailAPI } from '@/service/home'
 	import type { ResidentItem } from '@/types/home'
 	import { onBackPress, onLoad, onShow } from '@dcloudio/uni-app'
@@ -34,7 +34,6 @@
 	const tags = ref<string[]>([])
 	// 入户信息
 	const visitInfo = ref<VisitItem[]>()
-	const visitType = [{ val: 0, text: '走访入户' }, { val: 1, text: '电话入户' }, { val: 2, text: '其他入户' }]
 	// 请求家庭成员信息
 	const familyMemList = ref<ResidentItem[]>([])
 	const getResidentDetail = async () => {
@@ -53,11 +52,8 @@
 		})
 	}
 
-	onLoad(() => {
-		getResidentDetail()
-	})
 	onShow(() => {
-		getResidentDetail()
+		getResidentDetail()  // 不出意外，刚进来就发了同一个请求2此
 	})
 
 	// 悬浮按钮
@@ -76,10 +72,10 @@
 		if (e.index === 0) {
 			// uni.navigateTo({ url: `/modules/handle-info/index` })
 			// 报错了！没解决。{"errMsg":"navigateTo:fail timeout"} ，不影响运行，且主包不会报错，使用标签也不会报错。2024-7-30
-			uni.navigateTo({ url: `/pages/handle-info/index?params=${query.params}&room=${query.room}&comm_num=${query.comm_num}` })
+			uni.navigateTo({ url: `/modules/handle-data/data-form/index?params=${query.params}&room=${query.room}&comm_num=${query.comm_num}` })
 		} else if (e.index === 1) {
 			// console.log('modify')
-			uni.navigateTo({ url: `/pages/handle-info/index?type=m1&data=${JSON.stringify(familyMemList.value.find(x => x.id == query.id))}&comm_num=${query.comm_num}` })
+			uni.navigateTo({ url: `/modules/handle-data/data-form/index?type=m1&data=${JSON.stringify(familyMemList.value.find(x => x.id == query.id))}&comm_num=${query.comm_num}` })
 		} else if (e.index === 2) {
 			// (popupRef.value as UniHelper.UniPopupInstance).open()
 			// popupRef.value?.open()
@@ -100,22 +96,14 @@
 
 	// 入户弹出层：重置
 	const resetForm = () => {
-		formData.value = Object.assign(formData.value, {
-			mainName: '',
-			type: '走访',
-			isSingle: false,
-			subName: '',
-			note: ''
-		})
+		formRef.value.resetFields()
 	}
 	// 入户弹出层：提交
 	const submitForm = () => {
 		// 验证表单数据
 		formRef.value?.validate(async (valid: any) => {
-			console.log(formData.value)
 			if (!valid) return uni.showToast({ title: '表单校验失败', icon: 'none', })
 			// 提交数据
-			// const { type, ...subData } = formData.value
 			const id = familyMemList.value[0].id
 			const comm_num = params.comm_num
 			await updateVisitNoteAPI({ ...formData.value, id, comm_num })
@@ -123,7 +111,9 @@
 			getResidentDetail()
 			popupRef.value!.close!()
 		})
-
+	}
+	const onPopupClose = () => {
+		formRef.value.resetFields()
 	}
 </script>
 
@@ -158,7 +148,7 @@
 										<text class="mem-val" v-if="item.id_card">{{ item.name }}({{ item.gender }},{{ item.age }}岁)</text>
 									</view>
 									<navigator
-										:url="`/pages/handle-info/index?type=m1&data=${JSON.stringify(item)}&comm_num=${query.comm_num}`"
+										:url="`/modules/handle-data/data-form/index?type=m1&data=${JSON.stringify(item)}&comm_num=${query.comm_num}`"
 										hover-class="none">
 										<text class="editor">编辑</text>
 										<text class="iconfont icon-youjiantou"></text>
@@ -276,31 +266,30 @@
 			<uni-fab ref="fabRef" horizontal="right" vertical="top" direction="horizontal" :content="fabContent"
 				:pattern="unifabPattern" @trigger="onFabTrigger" />
 			<!-- 底部弹窗-填写入户信息 -->
-			<uni-popup ref="popupRef" background-color="#fff" border-radius="10rpx 10rpx 0 0">
+			<uni-popup ref="popupRef" background-color="#fff" border-radius="10rpx 10rpx 0 0" @maskClick="onPopupClose">
 				<view class="popup-wrapper">
 					<view class="title">填写入户记录</view>
 					<view class="form">
 						<!-- 表单 -->
-						<tn-form ref="formRef" :model="formData" :rules="formRules" label-width="140" label-position="right"
-							status-icon>
-							<tn-form-item label="姓名" prop="mainName">
-								<tn-input type="text" v-model="formData.mainName" placeholder="请输入姓名" underline />
+						<tn-form ref="formRef" :model="formData" :rules="formRules" label-width="140" status-icon>
+							<tn-form-item label="入户人:" prop="mainName">
+								<tn-input type="text" v-model="formData.mainName" placeholder="请输入入户人姓名" underline clearable />
 							</tn-form-item>
-							<tn-form-item label="类型" prop="type">
+							<tn-form-item label="入户类型:" prop="type">
 								<TnRadioGroup v-model="formData.type">
 									<TnRadio active-color="#ff1744" label="走访">走访</TnRadio>
 									<TnRadio active-color="#1de9b6" label="电话">电话</TnRadio>
 									<TnRadio active-color="#9e9e9e" label="其他">其他</TnRadio>
 								</TnRadioGroup>
 							</tn-form-item>
-							<tn-form-item label="单人入户" prop="isSingle">
+							<tn-form-item label="单人入户:" prop="isSingle">
 								<tn-switch v-model="formData.isSingle" shape="square" size="sm" active-color="#27ba9b" />
 							</tn-form-item>
-							<tn-form-item label="陪同人员" prop="subName" v-if="!formData.isSingle">
-								<tn-input v-model.lazy="formData.subName" placeholder="请输入陪同入户人员姓名" underline />
+							<tn-form-item label="陪同人员:" prop="subName" v-if="!formData.isSingle">
+								<tn-input v-model.lazy="formData.subName" placeholder="请输入陪同入户人员姓名" underline clearable />
 							</tn-form-item>
-							<tn-form-item label="入户记录" prop="note">
-								<tn-input type="textarea" height="200" v-model="formData.note" placeholder="入户记录（2-200字）" />
+							<tn-form-item label="记录:" prop="note">
+								<tn-input type="textarea" height=200 v-model="formData.note" placeholder="在此处写下入户记录" clearable />
 							</tn-form-item>
 							<view class="btns-wrapper">
 								<button class="btn reset" @click="resetForm">重置</button>
@@ -355,9 +344,9 @@
 		}
 	}
 
-	page {
-		height: 100%;
-	}
+	//page {
+	//height: 100%;
+	//}
 
 	// 整体页面，网格背景
 	.man-detail {
@@ -428,7 +417,8 @@
 
 					.editor,
 					.iconfont {
-						color: $warnColor;
+						color: $GridColor;
+						font-weight: 500;
 					}
 				}
 			}

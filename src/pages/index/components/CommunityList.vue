@@ -39,10 +39,13 @@
 	}
 
 	const onGetIndex = async (e: any) => {
-		const { cancel } = await uni.showModal({ title: '提示消息', content: '前往查看花名册？' })
+		const { cancel } = await uni.showModal({ title: '提示消息', content: '查看数据列表？' })
 		if (cancel) return
-		console.log(e)
-		// TODO:跳转页面，渲染相应的数据
+		// console.log(e) 还有好多属性和方法，有时间慢慢研究研究
+		uni.navigateTo({
+			url: `/modules/handle-data/data-show/special-group?type=1&cate=${e.currentIndex.index}`
+		})
+
 	}
 </script>
 
@@ -54,12 +57,6 @@
 		<view class="cc-body">
 			<!-- 社区列表 -->
 			<uni-card title="社区列表" thumbnail="/static/imgs/中国结.png" margin="10rpx" padding="10rpx">
-				<!-- <template #title>
-					<view class="title-slot">
-						<text class="iconfont icon-zhongguojie"></text>
-						<text class="title">社区列表</text>
-					</view>
-				</template> -->
 				<view class="communities">
 					<view class="community-item" v-for="item in commList" :key="item.id"
 						:class="{ active: item.id === gridStore.commNum }" @tap="tabCurrItem(item.id)">

@@ -9,8 +9,8 @@
   import TnRegionPicker from '@tuniao/tnui-vue3-uniapp/components/region-picker/src/region-picker.vue'
   import TnCheckbox from '@tuniao/tnui-vue3-uniapp/components/checkbox/src/checkbox.vue'
   import TnCheckboxGroup from '@tuniao/tnui-vue3-uniapp/components/checkbox/src/checkbox-group.vue'
-  import { formRules } from './form Rules';
   import { createMemberAPI, updateInfoAPI } from '@/service/detail'
+  import { formRules } from './form-rules1'
 
   const props = defineProps<{
     params?: string

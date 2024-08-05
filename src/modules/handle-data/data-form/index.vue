@@ -40,13 +40,12 @@
 
 <template>
 	<view class="form-wrapper">
-		<view>index{{ query.comm_num }}</view>
 		<EditorForm :params="query.params" :room="query.room" :memberInfo="memberInfo" :comm_num="query.comm_num" />
 	</view>
 </template>
 
 <style lang="scss">
 	.form-wrapper {
-		background-color: #fff;
+		padding: 10rpx;
 	}
 </style>

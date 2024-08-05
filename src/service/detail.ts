@@ -1,6 +1,9 @@
-import type { VisitForm, VisitItem } from "@/types/details";
+import type { VisitItem } from "@/types/details";
 import type { ResidentItem } from "@/types/home";
 import http from "@/utils/http";
+import { httpApi } from "./http-config";
+import type { CommonType } from "@/store/modules/grid";
+import type { DibaoItem } from "@/types/handle-data";
 
 // 更新入户信息
 export const updateVisitNoteAPI = (data: VisitItem) => {
@@ -19,7 +22,7 @@ export const updateInfoAPI = (data: object) => {
 export const createMemberAPI = (data: object) => {
 	return http.post('/api/create_member', data)
 }
-// // 删除一条居民信息
+// 删除一条居民信息
 export const dropItemAPI = (id: number, comm_num: number | string) => {
 	return http.request({
 		url: '/api/drop_item',
@@ -29,4 +32,9 @@ export const dropItemAPI = (id: number, comm_num: number | string) => {
 			comm_num
 		}
 	})
+}
+
+// 获取低保列表
+export const getDataListAPI = (data: { pn?: number, comm_num?: CommonType, grid_num?: CommonType, cate?: string }) => {
+	return http.get<{ total: number, title: string, result: any }>(`${httpApi}/dibao_list`, data)
 }

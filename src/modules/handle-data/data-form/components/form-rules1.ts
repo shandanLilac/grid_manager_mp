@@ -52,7 +52,7 @@ const validateTags = (rule: any, value: string[], cb: any) => {
 
 export const formRules: FormRules = {
   name: [
-    { required: true, message: '姓名不能为空', trigger: ['change', 'blur'] },
+    { required: true, message: '姓名不宜为空', trigger: ['change', 'blur'] },
     { pattern: nameReg, message: '姓名不正确', trigger: ['blur'] }
   ],
   nationality: [
@@ -76,7 +76,7 @@ export const formRules: FormRules = {
     { pattern: phoneReg, message: '联系电话不正确,座机请参考0936-2727733', trigger: ['blur'] }
   ],
   doing: [
-    { pattern: /^[\S]{1,24}$/, message: '不能多于24个字符', trigger: ['blur'] }
+    { pattern: /^[\S]{1,24}$/, message: '不宜多于24个字符', trigger: ['blur'] }
   ],
   marriage: [
     { validator: validateMarriage, trigger: ['change', 'blur'] }
@@ -85,7 +85,7 @@ export const formRules: FormRules = {
     { validator: validateEdu, trigger: ['change', 'blur'] }
   ],
   health: [
-    { pattern: /^[\S]{1,24}$/, message: '不能多于24个字符', trigger: ['blur'] }
+    { pattern: /^[\S]{1,24}$/, message: '不宜多于24个字符', trigger: ['blur'] }
   ],
   religion: [
     { validator: validateReligion, trigger: ['change', 'blur'] }
